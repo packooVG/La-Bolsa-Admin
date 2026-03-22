@@ -1,0 +1,3352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>La Bolsa — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06080F;--sur:#0C1018;--card:#111520;--brd:#1C2333;
+  --acc:#00E676;--gld:#FFD166;--red:#FF3B5C;--blu:#4A9EFF;--prp:#A259FF;
+  --txt:#F0F4FF;--sub:#5C6E8A;
+}
+body.light{
+  --bg:#F4F6FF;--sur:#E8EDF8;--card:#FFFFFF;--brd:#D0D8EE;
+  --txt:#0C1018;--sub:#5C6E8A;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Space Mono',monospace;background:var(--bg);color:var(--txt);min-height:100vh;transition:background .2s,color .2s;}
+input,button,select,textarea{font-family:'Space Mono',monospace;}
+input:focus,select:focus{outline:none;border-color:var(--acc)!important;}
+button{cursor:pointer;}
+button:hover{opacity:.86;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--brd);border-radius:4px;}
+
+/* ── Layout ── */
+.hdr{background:var(--sur);border-bottom:1px solid var(--brd);padding:0 16px;height:54px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:200;}
+.logo{display:flex;align-items:center;gap:9px;flex-shrink:0;}
+.logo-t{font-family:'Syne',sans-serif;font-weight:900;font-size:15px;color:var(--acc);line-height:1;}
+.logo-s{font-size:7px;color:var(--sub);letter-spacing:2px;}
+.ml{margin-left:auto;}
+.wrap{padding:16px;max-width:960px;margin:0 auto 32px;}
+
+/* ── Top Nav ── */
+.top-nav{background:var(--sur);border-bottom:1px solid var(--brd);display:flex;overflow-x:auto;position:sticky;top:54px;z-index:100;}
+.top-nav::-webkit-scrollbar{display:none;}
+.tnb{background:transparent;border:none;color:var(--sub);padding:10px 16px;font-weight:700;font-size:11px;white-space:nowrap;border-bottom:2px solid transparent;}
+.tnb.on{color:var(--acc);border-bottom-color:var(--acc);}
+
+/* ── Cards & Badges ── */
+.card{background:var(--card);border:1px solid var(--brd);border-radius:14px;padding:16px 18px;margin-bottom:12px;}
+.card-lbl{font-size:9px;color:var(--sub);letter-spacing:2px;margin-bottom:12px;}
+.badge{display:inline-flex;align-items:center;border-radius:20px;padding:3px 9px;font-size:10px;font-weight:700;white-space:nowrap;}
+.b-g{background:#00E67622;color:var(--acc);border:1px solid #00E67644;}
+.b-y{background:#FFD16622;color:var(--gld);border:1px solid #FFD16644;}
+.b-r{background:#FF3B5C22;color:var(--red);border:1px solid #FF3B5C44;}
+.b-b{background:#4A9EFF22;color:var(--blu);border:1px solid #4A9EFF44;}
+.b-sm{font-size:9px;padding:2px 7px;}
+
+/* ── Buttons ── */
+.btn{border-radius:10px;padding:8px 16px;font-weight:700;font-size:12px;border:2px solid;white-space:nowrap;}
+.btn-a{background:var(--acc);color:var(--bg);border-color:var(--acc);}
+.btn-o{background:transparent;border-color:var(--sub);color:var(--sub);}
+.btn-r{background:transparent;border-color:var(--red);color:var(--red);}
+.btn-b{background:transparent;border-color:var(--blu);color:var(--blu);}
+.btn-g{background:#25D36618;border-color:#25D366;color:#25D366;}
+.btn-sm{padding:4px 10px;font-size:11px;}
+
+/* ── Inputs ── */
+.inp{background:var(--sur);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:8px 12px;width:100%;font-size:13px;}
+.inp-sm{width:56px;text-align:center;padding:4px 6px;}
+.fld{margin-bottom:10px;}
+.fld label{font-size:9px;color:var(--sub);letter-spacing:1px;display:block;margin-bottom:4px;}
+
+/* ── Stats ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+.stat{background:var(--card);border:1px solid var(--brd);border-radius:14px;padding:12px 8px;text-align:center;}
+.stat-v{font-weight:800;font-size:20px;margin-bottom:3px;}
+.stat-l{font-size:10px;color:var(--sub);}
+
+/* ── Event grid ── */
+.ev-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.ev-card{background:var(--card);border:1px solid var(--brd);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;}
+.ev-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
+.ev-hd{padding:12px 14px;display:flex;align-items:center;gap:10px;position:relative;}
+.ev-nm{font-family:'Syne',sans-serif;font-weight:900;font-size:13px;color:#fff;line-height:1.2;}
+.ev-sub{font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;}
+.ev-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:10px 14px;}
+.ev-s{background:var(--sur);border-radius:8px;padding:5px 4px;text-align:center;}
+.ev-sv{font-weight:700;font-size:13px;color:var(--acc);}
+.ev-sl{font-size:9px;color:var(--sub);margin-top:1px;}
+.inact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.inact-c{background:var(--card);border:1px solid var(--brd);border-radius:12px;padding:11px;display:flex;align-items:center;gap:8px;opacity:.6;}
+.inact-nm{font-weight:700;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+
+/* ── Chart ── */
+.chart-wrap{position:relative;height:120px;display:flex;align-items:flex-end;gap:6px;padding:0 4px;}
+.chart-bar{flex:1;background:var(--acc);border-radius:4px 4px 0 0;min-width:0;transition:height .4s;position:relative;}
+.chart-bar:hover .chart-tip{display:block;}
+.chart-tip{display:none;position:absolute;bottom:105%;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--brd);border-radius:6px;padding:4px 8px;font-size:10px;white-space:nowrap;color:var(--txt);z-index:10;}
+
+/* ── Det header ── */
+.det-hdr{background:var(--sur);border-bottom:1px solid var(--brd);padding:0 16px;height:50px;display:flex;align-items:center;gap:10px;position:sticky;top:54px;z-index:100;}
+
+/* ── Det tabs ── */
+.tabs{display:flex;gap:3px;border-bottom:1px solid var(--brd);margin-bottom:16px;overflow-x:auto;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{background:transparent;color:var(--sub);border:none;border-radius:8px 8px 0 0;padding:8px 14px;font-weight:700;font-size:11px;border-bottom:2px solid transparent;white-space:nowrap;}
+.tab.on{background:var(--acc);color:var(--bg);border-bottom-color:var(--acc);}
+
+/* ── Rows ── */
+.pend-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--sur);border:1px solid #FFD16633;border-radius:10px;margin-bottom:7px;flex-wrap:wrap;}
+.conf-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#00E67608;border:1px solid #00E67622;border-radius:10px;margin-bottom:7px;flex-wrap:wrap;}
+.num-circle{width:24px;height:24px;border-radius:50%;background:#00E67222;color:var(--acc);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;}
+
+/* ── Resultado ── */
+.m-row{background:var(--sur);border:1.5px solid var(--brd);border-radius:12px;padding:12px 14px;margin-bottom:8px;}
+.m-row.done{border-color:#00E67644;background:#00E67605;}
+.btn-res{background:var(--sur);color:var(--sub);border:1px solid var(--brd);border-radius:8px;padding:6px 10px;font-weight:700;font-size:11px;}
+.btn-res.on{background:var(--acc);color:var(--bg);border-color:var(--acc);}
+
+/* ── Ganadores ── */
+.g-card{border-radius:14px;padding:15px;margin-bottom:10px;border:1px solid var(--brd);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+
+/* ── Mensajes ── */
+.msg-pre{background:var(--sur);border-radius:10px;padding:12px;font-family:'Segoe UI',sans-serif;font-size:12px;color:var(--txt);white-space:pre-wrap;line-height:1.6;margin-top:10px;}
+
+/* ── Pago toggle ── */
+.toggle{width:44px;height:24px;border-radius:12px;display:flex;align-items:center;padding:0 3px;transition:.2s;flex-shrink:0;}
+.toggle-dot{width:18px;height:18px;border-radius:50%;background:#fff;}
+
+/* ── Parcial ── */
+.parc-bar-bg{background:var(--brd);border-radius:4px;height:5px;overflow:hidden;margin-top:5px;}
+.parc-bar{height:100%;border-radius:4px;transition:width .4s;}
+
+/* ── PIN overlay ── */
+#pin-overlay{position:fixed;inset:0;background:#06080F;display:flex;align-items:center;justify-content:center;z-index:9999;}
+.pin-box{background:#111520;border:1px solid #1C2333;border-radius:20px;padding:36px 28px;text-align:center;width:310px;max-width:92vw;}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid #1C2333;background:transparent;transition:all .2s;}
+.pin-dot.filled{background:var(--acc);border-color:var(--acc);}
+.pin-key{background:#161C2A;border:1px solid #1C2333;border-radius:12px;padding:16px;font-size:20px;font-weight:700;color:var(--txt);transition:all .15s;}
+.pin-key:hover{background:#1C2333;}
+.pin-key:active{transform:scale(.93);}
+
+/* ── Compartir card ── */
+.wa-card{background:linear-gradient(135deg,#1B2B1B,#0A1A0A);border:2px solid var(--acc);border-radius:20px;padding:24px 20px;text-align:center;position:relative;overflow:hidden;margin-bottom:14px;}
+.wa-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,#00E67615,transparent 70%);}
+
+/* ── Modal ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:8888;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-box{background:#111520;border:1px solid #1C2333;border-radius:16px;padding:22px;max-width:480px;width:100%;max-height:85vh;overflow-y:auto;}
+
+/* ── Views ── */
+.view{display:none;}.view.on{display:block;}
+.tsec{display:none;}.tsec.on{display:block;}
+.sec-lbl{font-size:9px;color:var(--sub);letter-spacing:3px;margin-bottom:12px;}
+
+/* ── RESPONSIVE — Desktop / Tablet ───────────────────────────────────────── */
+@media (min-width: 768px) {
+  body { max-width: 100%; background: var(--bg); }
+
+  /* Desktop wrapper */
+  .desktop-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* Header full width */
+  .hdr {
+    max-width: 100%;
+    padding: 0 32px;
+  }
+  .top-nav, .ev-tabs {
+    max-width: 100%;
+    padding: 0 32px;
+  }
+
+  /* Content centered with sidebar feel */
+  .pad {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 32px 80px;
+  }
+  .wrap {
+    padding: 24px 32px;
+  }
+
+  /* Nav bottom → side on desktop */
+  .nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 720px;
+    max-width: 100%;
+    border-radius: 0;
+  }
+
+  /* Hero taller on desktop */
+  .hero { height: 200px; }
+  .hero-nm { font-size: 32px; }
+  .hero-sub { font-size: 12px; }
+  .hero-ic  { font-size: 48px; }
+
+  /* Bigger bolsa */
+  .bolsa-amt { font-size: 72px; }
+
+  /* Card grids */
+  .prox-grid { grid-template-columns: repeat(4, 1fr); }
+
+  /* Stats bigger */
+  .stat-v { font-size: 26px; }
+  .ev-grid { grid-template-columns: repeat(3, 1fr); }
+  .inact-grid { grid-template-columns: repeat(5, 1fr); }
+  .stats { grid-template-columns: repeat(4, 1fr); }
+
+  /* Picks wider */
+  .match { padding: 14px 18px; }
+  .team-nm { font-size: 13px; }
+
+  /* Buttons bigger */
+  .btn-main { font-size: 20px; padding: 20px; }
+  .btn-send { font-size: 16px; padding: 18px; }
+}
+
+@media (min-width: 1024px) {
+  .pad    { max-width: 820px; }
+  .wrap   { max-width: 960px; padding: 28px 40px; }
+  .nav    { width: 820px; }
+
+  /* Two column layout for picks */
+  .picks-grid-desktop { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* Hero even taller */
+  .hero { height: 240px; }
+  .hero-nm { font-size: 38px; }
+
+  /* Bigger cards */
+  .bolsa-amt { font-size: 80px; }
+  .prox-grid { grid-template-columns: repeat(5, 1fr); }
+  .ev-grid   { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ─── Admin: full responsive ─── */
+@media (max-width: 600px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .ev-grid { grid-template-columns: 1fr; }
+  .inact-grid { grid-template-columns: repeat(2, 1fr); }
+  .hdr { padding: 0 12px; }
+  .wrap { padding: 12px; }
+  .top-nav .tnb { padding: 10px 10px; font-size: 10px; }
+  .det-hdr { padding: 0 12px; }
+}
+@media (min-width: 601px) and (max-width: 900px) {
+  .ev-grid    { grid-template-columns: repeat(2, 1fr); }
+  .inact-grid { grid-template-columns: repeat(3, 1fr); }
+  .stats      { grid-template-columns: repeat(4, 1fr); }
+}
+@media (min-width: 901px) {
+  .ev-grid    { grid-template-columns: repeat(3, 1fr); }
+  .inact-grid { grid-template-columns: repeat(4, 1fr); }
+  .stats      { grid-template-columns: repeat(4, 1fr); }
+  .wrap       { max-width: 1100px; }
+}
+</style>
+</head>
+<body>
+
+<!-- PIN OVERLAY -->
+<div id="pin-overlay">
+  <div class="pin-box">
+    <svg width="48" height="48" viewBox="0 0 100 100" fill="none" style="margin-bottom:14px;">
+      <defs><linearGradient id="plg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00E676"/><stop offset="100%" stop-color="#00BFA5"/></linearGradient></defs>
+      <circle cx="50" cy="50" r="46" fill="#111520" stroke="#00E676" stroke-width="2.5"/>
+      <path d="M30,55 Q28,38 50,35 Q72,38 70,55 Q70,72 50,74 Q30,72 30,55Z" fill="url(#plg)" opacity=".9"/>
+      <path d="M40,35 Q40,24 50,24 Q60,24 60,35" fill="none" stroke="#00E676" stroke-width="3.5" stroke-linecap="round"/>
+      <text x="50" y="61" text-anchor="middle" font-size="24" font-weight="900" fill="#06080F" font-family="Arial Black">$</text>
+    </svg>
+    <div style="font-family:'Syne',sans-serif;font-weight:900;font-size:20px;color:#00E676;margin-bottom:2px;">La Bolsa</div>
+    <div style="font-size:10px;color:#5C6E8A;margin-bottom:24px;letter-spacing:2px;">PANEL ADMIN</div>
+    <div id="pin-dots" style="display:flex;justify-content:center;gap:12px;margin-bottom:16px;">
+      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
+    <div id="pin-error" style="color:#FF3B5C;font-size:12px;height:18px;margin-bottom:10px;"></div>
+    <div id="pin-pad" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px;"></div>
+    <button id="pin-clear-btn" style="width:100%;background:transparent;border:1px solid #1C2333;border-radius:10px;padding:10px;color:#5C6E8A;font-size:13px;font-weight:700;">⌫ Borrar</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="logo">
+    <svg width="30" height="30" viewBox="0 0 100 100" fill="none">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00E676"/><stop offset="100%" stop-color="#00BFA5"/></linearGradient></defs>
+      <circle cx="50" cy="50" r="46" fill="#111520" stroke="#00E676" stroke-width="2.5"/>
+      <path d="M30,55 Q28,38 50,35 Q72,38 70,55 Q70,72 50,74 Q30,72 30,55Z" fill="url(#lg)" opacity=".9"/>
+      <path d="M40,35 Q40,24 50,24 Q60,24 60,35" fill="none" stroke="#00E676" stroke-width="3.5" stroke-linecap="round"/>
+      <text x="50" y="61" text-anchor="middle" font-size="24" font-weight="900" fill="#06080F" font-family="Arial Black">$</text>
+    </svg>
+    <div><div class="logo-t">La Bolsa</div><div class="logo-s">PANEL ADMIN 🔒</div></div>
+  </div>
+  <span class="badge b-r b-sm" id="veedor-badge" style="display:none;">👁 VEEDOR</span>
+  <div class="ml" style="display:flex;align-items:center;gap:8px;">
+    <button id="btn-theme" style="background:transparent;border:1px solid var(--brd);border-radius:8px;padding:5px 9px;font-size:15px;color:var(--sub);">🌙</button>
+    <div style="text-align:right;">
+      <div id="hdr-com" style="font-weight:700;font-size:14px;color:var(--acc);">$0</div>
+      <div style="font-size:9px;color:var(--sub);">mi comisión</div>
+    </div>
+  </div>
+</header>
+
+<!-- TOP NAV -->
+<nav class="top-nav" id="main-nav">
+  <button class="tnb on" data-view="home">🏠 Eventos</button>
+  <button class="tnb" data-view="pago">💳 Mis datos de pago</button>
+  <button class="tnb" data-view="editor">✏️ Editar eventos</button>
+  <button class="tnb" data-view="compartir">📸 Compartir</button>
+  <button class="tnb" data-view="historial">📚 Historial</button>
+  <button class="tnb" data-view="contabilidad">🧾 Contabilidad</button>
+  <button class="tnb" data-view="analytics">📊 Analytics</button>
+  <button class="tnb" data-view="config">⚙️ Configuración</button>
+</nav>
+
+<!-- ═══ HOME ═══ -->
+<div id="v-home" class="view on">
+  <div class="wrap">
+    <!-- Stats globales -->
+    <div class="stats">
+      <div class="stat"><div class="stat-v" id="g-act" style="color:var(--acc);">0</div><div class="stat-l">Activos</div></div>
+      <div class="stat"><div class="stat-v" id="g-jug">0</div><div class="stat-l">Jugadores</div></div>
+      <div class="stat"><div class="stat-v" id="g-bol" style="color:var(--gld);">$0</div><div class="stat-l">Bolsa total</div></div>
+      <div class="stat"><div class="stat-v" id="g-com" style="color:var(--acc);">$0</div><div class="stat-l">Mi comisión</div></div>
+    </div>
+
+    <!-- Desglose por quiniela -->
+    <div class="card" style="margin-bottom:16px;" id="desglose-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div class="card-lbl" style="margin:0;">📊 MÉTRICAS POR QUINIELA</div>
+        <div id="popularidad-badge" style="font-size:10px;color:var(--sub);"></div>
+      </div>
+      <div id="desglose-list"></div>
+    </div>
+
+    <!-- Gráfica semanal -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-lbl">📈 INGRESOS POR SEMANA (comisión)</div>
+      <div class="chart-wrap" id="chart-wrap"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px;" id="chart-labels"></div>
+    </div>
+
+    <!-- Activos -->
+    <div id="sec-act">
+      <div class="sec-lbl">🟢 ACTIVOS ESTA SEMANA</div>
+      <div class="ev-grid" id="grid-act"></div>
+    </div>
+
+    <!-- Inactivos -->
+    <div>
+      <div class="sec-lbl">⚫ INACTIVOS — ACTIVAR CUANDO CORRESPONDA</div>
+      <div class="inact-grid" id="grid-inact"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DETALLE EVENTO ═══ -->
+<div id="v-det" class="view">
+  <div class="det-hdr">
+    <button class="btn btn-o btn-sm" id="btn-back">← Volver</button>
+    <span id="d-ic" style="font-size:18px;"></span>
+    <span id="d-nm" style="font-family:'Syne',sans-serif;font-weight:800;font-size:14px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+    <span id="d-pend-badge" class="badge b-y b-sm" style="display:none;"></span>
+    <span id="d-com-badge" class="badge b-g b-sm"></span>
+  </div>
+  <div class="wrap">
+    <div class="stats" style="margin-bottom:14px;">
+      <div class="stat"><div class="stat-v" id="d-bruta" style="color:var(--sub);">$0</div><div class="stat-l">Bolsa bruta</div></div>
+      <div class="stat"><div class="stat-v" id="d-com" style="color:var(--acc);">$0</div><div class="stat-l">Comisión</div></div>
+      <div class="stat"><div class="stat-v" id="d-neta" style="color:var(--gld);">$0</div><div class="stat-l">Bolsa neta</div></div>
+      <div class="stat"><div class="stat-v" id="d-jug" style="color:var(--blu);">0</div><div class="stat-l">Jugadores</div></div>
+    </div>
+    <div class="tabs" id="det-tabs">
+      <button class="tab on" data-tab="jugadores">👥 Jugadores</button>
+      <button class="tab" data-tab="parcial">📊 En Vivo</button>
+      <button class="tab" data-tab="resultados">✅ Resultados</button>
+      <button class="tab" data-tab="ganadores">🏆 Ganadores</button>
+      <button class="tab" data-tab="mensajes">📱 Mensajes</button>
+    </div>
+    <div id="t-jugadores" class="tsec on"></div>
+    <div id="t-parcial"   class="tsec"></div>
+    <div id="t-resultados" class="tsec"></div>
+    <div id="t-ganadores" class="tsec"></div>
+    <div id="t-mensajes"  class="tsec"></div>
+  </div>
+</div>
+
+<!-- ═══ DATOS DE PAGO ═══ -->
+<div id="v-pago" class="view">
+  <div class="wrap">
+    <div class="card" style="border-color:#00E67644;background:#00E67606;margin-bottom:14px;">
+      <div class="card-lbl">💡 CÓMO FUNCIONA</div>
+      <div style="font-size:12px;color:var(--sub);line-height:1.9;">Configura tus datos aquí. El jugador los ve cuando da clic en <strong style="color:var(--txt);">"Pagar"</strong> en su app y puede mandarte el comprobante por WhatsApp.</div>
+    </div>
+    <div id="pago-list"></div>
+    <button class="btn btn-a" id="btn-save-pago" style="width:100%;padding:12px;">💾 Guardar datos de pago</button>
+  </div>
+</div>
+
+<!-- ═══ EDITOR ═══ -->
+<div id="v-editor" class="view">
+  <div class="wrap">
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-lbl">✏️ SELECCIONA UN EVENTO PARA EDITAR</div>
+      <select class="inp" id="edit-sel"></select>
+    </div>
+    <div id="editor-form" style="display:none;">
+      <div class="card">
+        <div class="card-lbl">📋 DATOS GENERALES</div>
+        <div class="fld"><label>NOMBRE</label><input class="inp" id="ed-n"/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="fld"><label>COSTO ($)</label><input class="inp" id="ed-costo" type="number"/></div>
+          <div class="fld"><label>ESTADO</label>
+            <select class="inp" id="ed-activo"><option value="1">🟢 Activo</option><option value="0">⚫ Inactivo</option></select>
+          </div>
+        </div>
+        <div class="fld"><label>FECHA DE CIERRE</label><input class="inp" id="ed-cierre"/></div>
+        <div class="fld"><label>DESCRIPCIÓN</label><input class="inp" id="ed-desc"/></div>
+        <div class="fld"><label>CRITERIO DE DESEMPATE</label><input class="inp" id="ed-des-lbl"/></div>
+      </div>
+      <div class="card">
+        <div class="card-lbl">⚽ PARTIDOS / PELEAS</div>
+        <div id="ed-matchups"></div>
+        <button class="btn btn-b btn-sm" id="btn-add-match" style="margin-top:8px;">+ Agregar</button>
+      </div>
+      <button class="btn btn-a" id="btn-save-edit" style="width:100%;padding:12px;">💾 Guardar cambios</button>
+      <div id="edit-ok" style="display:none;text-align:center;color:var(--acc);padding:12px;font-weight:700;">✅ Guardado</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ COMPARTIR ═══ -->
+<div id="v-compartir" class="view">
+  <div class="wrap">
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-lbl">📱 EVENTO A COMPARTIR</div>
+      <select class="inp" id="comp-sel"></select>
+    </div>
+    <div class="wa-card" id="wa-card">
+      <div style="position:relative;z-index:1;">
+        <div id="wc-ic" style="font-size:44px;margin-bottom:8px;">⚽</div>
+        <div id="wc-nm" style="font-family:'Syne',sans-serif;font-weight:900;font-size:22px;color:var(--acc);margin-bottom:4px;"></div>
+        <div id="wc-desc" style="font-size:11px;color:var(--sub);margin-bottom:16px;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
+          <div style="background:#ffffff10;border-radius:10px;padding:10px 6px;text-align:center;">
+            <div id="wc-bol" style="font-weight:800;font-size:20px;color:var(--acc);">$0</div>
+            <div style="font-size:9px;color:var(--sub);margin-top:2px;">BOLSA</div>
+          </div>
+          <div style="background:#ffffff10;border-radius:10px;padding:10px 6px;text-align:center;">
+            <div id="wc-jug" style="font-weight:800;font-size:20px;color:var(--txt);">0</div>
+            <div style="font-size:9px;color:var(--sub);margin-top:2px;">JUGADORES</div>
+          </div>
+          <div style="background:#ffffff10;border-radius:10px;padding:10px 6px;text-align:center;">
+            <div id="wc-cost" style="font-weight:800;font-size:20px;color:var(--gld);">$0</div>
+            <div style="font-size:9px;color:var(--sub);margin-top:2px;">ENTRADA</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
+          <div style="background:#FFD16620;border-radius:10px;padding:8px 4px;text-align:center;"><div style="font-size:16px;">🥇</div><div id="wc-p1" style="font-weight:700;font-size:13px;color:var(--gld);">$0</div><div style="font-size:9px;color:var(--sub);">1er lugar</div></div>
+          <div style="background:#94A3B820;border-radius:10px;padding:8px 4px;text-align:center;"><div style="font-size:16px;">🥈</div><div id="wc-p2" style="font-weight:700;font-size:13px;color:#94A3B8;">$0</div><div style="font-size:9px;color:var(--sub);">2do lugar</div></div>
+          <div style="background:#CD7C3A20;border-radius:10px;padding:8px 4px;text-align:center;"><div style="font-size:16px;">🥉</div><div id="wc-p3" style="font-weight:700;font-size:13px;color:#CD7C3A;">$0</div><div style="font-size:9px;color:var(--sub);">3er lugar</div></div>
+        </div>
+        <div id="wc-cierre" style="font-size:10px;color:var(--sub);margin-bottom:12px;"></div>
+        <div style="background:var(--acc);color:var(--bg);border-radius:12px;padding:10px 20px;font-weight:900;font-size:15px;font-family:'Syne',sans-serif;">⚡ ¿Le entras? — $<span id="wc-btn-costo">0</span></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <button class="btn btn-o" id="btn-copy-wa">📋 Copiar mensaje</button>
+      <button class="btn btn-g" id="btn-wa-open">📱 Abrir WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ANALYTICS ═══ -->
+<div id="v-analytics" class="view">
+  <div class="wrap">
+
+    <!-- KPIs principales -->
+    <div class="stats" style="grid-template-columns:repeat(2,1fr);margin-bottom:16px;" id="an-kpis"></div>
+
+    <!-- Gráfica de ingresos diarios -->
+    <div class="card" style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div class="card-lbl" style="margin:0;">📈 INGRESOS POR QUINIELA</div>
+        <select class="inp" id="an-periodo" style="width:auto;font-size:11px;padding:4px 8px;">
+          <option value="all">Todo el tiempo</option>
+          <option value="month">Este mes</option>
+          <option value="week">Esta semana</option>
+        </select>
+      </div>
+      <div id="an-chart-bars" style="display:flex;align-items:flex-end;gap:8px;height:140px;padding:0 4px;"></div>
+      <div id="an-chart-labels" style="display:flex;gap:8px;margin-top:6px;padding:0 4px;"></div>
+    </div>
+
+    <!-- Top eventos por jugadores -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-lbl">🏆 POPULARIDAD DE EVENTOS</div>
+      <div id="an-top-eventos"></div>
+    </div>
+
+    <!-- Top jugadores -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-lbl">👑 TOP 10 JUGADORES MÁS ACTIVOS</div>
+      <div id="an-top-jugs"></div>
+    </div>
+
+    <!-- Tasa de conversión -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-lbl">📊 TASA DE CONVERSIÓN</div>
+      <div id="an-conversion"></div>
+    </div>
+
+    <!-- Proyección -->
+    <div class="card" style="border-color:#4A9EFF44;background:#4A9EFF06;">
+      <div class="card-lbl">🔮 PROYECCIÓN MENSUAL</div>
+      <div id="an-proyeccion"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ CONFIGURACIÓN ═══ -->
+<div id="v-config" class="view">
+  <div class="wrap">
+
+    <!-- Número WhatsApp -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-lbl">📱 TU NÚMERO DE WHATSAPP</div>
+      <div style="font-size:12px;color:var(--sub);margin-bottom:10px;line-height:1.7;">
+        Con código de país, sin + ni espacios.<br>
+        Ejemplo: <strong style="color:var(--txt);">526643123456</strong>
+      </div>
+      <div class="fld"><label>NÚMERO WHATSAPP</label>
+        <input class="inp" id="cfg-wa" type="tel" placeholder="526643123456"/>
+      </div>
+      <button class="btn btn-a btn-sm" id="btn-save-wa" style="margin-top:4px;">💾 Guardar número</button>
+    </div>
+
+    <!-- PIN -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-lbl">🔐 CAMBIAR PIN DE ACCESO</div>
+      <div style="font-size:12px;color:var(--sub);margin-bottom:10px;">PIN de 4 dígitos para proteger el Admin.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
+        <div class="fld"><label>PIN ACTUAL</label>
+          <input class="inp" id="cfg-pin-old" type="password" maxlength="4" placeholder="••••"/>
+        </div>
+        <div class="fld"><label>PIN NUEVO</label>
+          <input class="inp" id="cfg-pin-new" type="password" maxlength="4" placeholder="••••"/>
+        </div>
+      </div>
+      <div id="cfg-pin-err" style="font-size:12px;color:var(--red);height:18px;margin-bottom:6px;"></div>
+      <button class="btn btn-a btn-sm" id="btn-save-pin">🔐 Cambiar PIN</button>
+    </div>
+
+    <!-- Plantillas de mensajes -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-lbl">💬 PLANTILLAS DE MENSAJES WHATSAPP</div>
+      <div style="font-size:12px;color:var(--sub);margin-bottom:14px;line-height:1.7;">
+        Edita el texto de cada mensaje. Usa estas variables:<br>
+        <span style="color:var(--acc);">{evento}</span> — nombre del evento<br>
+        <span style="color:var(--acc);">{costo}</span> — precio de entrada<br>
+        <span style="color:var(--acc);">{cierre}</span> — fecha de cierre<br>
+        <span style="color:var(--acc);">{desempate}</span> — criterio de desempate<br>
+        <span style="color:var(--acc);">{bolsa}</span> — bolsa neta<br>
+        <span style="color:var(--acc);">{1ro}</span> <span style="color:var(--acc);">{2do}</span> <span style="color:var(--acc);">{3ro}</span> — ganadores<br>
+        <span style="color:var(--acc);">{premio1}</span> <span style="color:var(--acc);">{premio2}</span> <span style="color:var(--acc);">{premio3}</span> — premios<br>
+        <span style="color:var(--acc);">{nombre}</span> — nombre del ganador (mensaje privado)<br>
+        <span style="color:var(--acc);">{premio}</span> — premio del ganador (mensaje privado)
+      </div>
+
+      <!-- Anuncio -->
+      <div class="fld" style="margin-bottom:14px;">
+        <label>📣 ANUNCIO DE QUINIELA</label>
+        <textarea class="inp" id="tpl-anuncio" rows="5" style="resize:vertical;line-height:1.6;"></textarea>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <button class="btn btn-o btn-sm tpl-preview" data-tpl="anuncio">👁 Preview</button>
+          <button class="btn btn-o btn-sm tpl-reset" data-tpl="anuncio">↺ Restablecer</button>
+        </div>
+      </div>
+
+      <!-- Resultados grupo -->
+      <div class="fld" style="margin-bottom:14px;">
+        <label>📱 RESULTADOS GRUPO</label>
+        <textarea class="inp" id="tpl-resultados" rows="7" style="resize:vertical;line-height:1.6;"></textarea>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <button class="btn btn-o btn-sm tpl-preview" data-tpl="resultados">👁 Preview</button>
+          <button class="btn btn-o btn-sm tpl-reset" data-tpl="resultados">↺ Restablecer</button>
+        </div>
+      </div>
+
+      <!-- Privado ganador -->
+      <div class="fld" style="margin-bottom:14px;">
+        <label>💬 MENSAJE PRIVADO AL GANADOR</label>
+        <textarea class="inp" id="tpl-privado" rows="7" style="resize:vertical;line-height:1.6;"></textarea>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <button class="btn btn-o btn-sm tpl-preview" data-tpl="privado">👁 Preview</button>
+          <button class="btn btn-o btn-sm tpl-reset" data-tpl="privado">↺ Restablecer</button>
+        </div>
+      </div>
+
+      <button class="btn btn-a" id="btn-save-tpl" style="width:100%;padding:12px;">💾 Guardar todas las plantillas</button>
+    </div>
+
+    <!-- Marca -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-lbl">🎨 PERSONALIZAR MARCA</div>
+      <div style="font-size:12px;color:var(--sub);margin-bottom:14px;line-height:1.7;">
+        Cambia el nombre, eslogan y colores de la app. Se aplica en ambas apps automáticamente.
+      </div>
+
+      <div class="fld">
+        <label>NOMBRE DE LA APP</label>
+        <input class="inp" id="marca-nombre" placeholder="La Bolsa" maxlength="20"/>
+      </div>
+      <div class="fld">
+        <label>ESLOGAN</label>
+        <input class="inp" id="marca-eslogan" placeholder="¿Cuánto hay en la bolsa?" maxlength="40"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="fld">
+          <label>COLOR PRINCIPAL</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="color" id="marca-color" value="#00E676" style="width:44px;height:38px;border:1px solid var(--brd);border-radius:8px;background:transparent;cursor:pointer;padding:2px;"/>
+            <input class="inp" id="marca-color-hex" placeholder="#00E676" maxlength="7" style="flex:1;"/>
+          </div>
+        </div>
+        <div class="fld">
+          <label>COLOR SECUNDARIO</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="color" id="marca-color2" value="#00BFA5" style="width:44px;height:38px;border:1px solid var(--brd);border-radius:8px;background:transparent;cursor:pointer;padding:2px;"/>
+            <input class="inp" id="marca-color2-hex" placeholder="#00BFA5" maxlength="7" style="flex:1;"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="fld">
+        <label>LOGO (PNG, JPG, SVG · máx 2MB)</label>
+        <input type="file" id="marca-logo-file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style="display:none;"/>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn btn-o btn-sm" id="btn-pick-logo" style="flex-shrink:0;">📁 Subir imagen</button>
+          <div id="marca-logo-name" style="font-size:11px;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">Sin imagen seleccionada</div>
+          <button class="btn btn-r btn-sm" id="btn-clear-logo" style="display:none;flex-shrink:0;">✕</button>
+        </div>
+        <div id="marca-logo-preview" style="display:none;margin-top:10px;text-align:center;">
+          <img id="marca-logo-img" style="width:72px;height:72px;border-radius:14px;object-fit:contain;border:2px solid var(--brd);background:var(--sur);padding:4px;" alt="Logo preview"/>
+        </div>
+        <div style="font-size:10px;color:var(--sub);margin-top:6px;">Se guarda en el dispositivo. Para mejor resultado usa imagen cuadrada.</div>
+      </div>
+
+      <!-- Preview -->
+      <div id="marca-preview" style="background:var(--sur);border-radius:12px;padding:14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
+        <div id="prev-logo" style="width:30px;height:30px;border-radius:8px;background:var(--acc);display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--bg);font-size:14px;">$</div>
+        <div>
+          <div id="prev-nombre" style="font-family:Syne,sans-serif;font-weight:900;font-size:15px;color:var(--acc);">La Bolsa</div>
+          <div id="prev-eslogan" style="font-size:7px;color:var(--sub);letter-spacing:2px;">¿CUÁNTO HAY EN LA BOLSA?</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <button class="btn btn-o" id="btn-reset-marca">↺ Restablecer</button>
+        <button class="btn btn-a" id="btn-save-marca">💾 Guardar marca</button>
+      </div>
+    </div>
+
+    <!-- Backup / Restore -->
+    <div class="card" style="margin-bottom:14px;border-color:#FFD16644;background:#FFD16606;">
+      <div class="card-lbl">💾 BACKUP DE DATOS</div>
+      <div style="font-size:12px;color:var(--sub);margin-bottom:14px;line-height:1.8;">
+        <strong style="color:#FFD166;">⚠️ Importante:</strong> Los datos se guardan en este dispositivo.<br>
+        Haz backup antes de limpiar caché o cambiar de celular.
+      </div>
+
+      <!-- Backup -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <div style="font-size:9px;color:var(--sub);letter-spacing:1px;margin-bottom:6px;">EXPORTAR</div>
+          <button class="btn btn-a" id="btn-backup" style="width:100%;padding:11px;font-size:12px;">📥 Descargar Backup</button>
+          <div style="font-size:10px;color:var(--sub);margin-top:4px;">Descarga un archivo .json con todos tus datos</div>
+        </div>
+        <div>
+          <div style="font-size:9px;color:var(--sub);letter-spacing:1px;margin-bottom:6px;">IMPORTAR</div>
+          <input type="file" id="backup-file-input" accept=".json" style="display:none;">
+          <button class="btn btn-o" id="btn-restore" style="width:100%;padding:11px;font-size:12px;">📤 Restaurar Backup</button>
+          <div style="font-size:10px;color:var(--sub);margin-top:4px;">Carga un archivo .json previamente exportado</div>
+        </div>
+      </div>
+
+      <div id="backup-status" style="display:none;border-radius:8px;padding:10px 14px;font-size:12px;margin-top:6px;"></div>
+
+      <!-- Última vez -->
+      <div id="backup-last" style="font-size:10px;color:var(--sub);margin-top:8px;"></div>
+    </div>
+
+    <!-- Exportar Excel -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-lbl">📊 EXPORTAR REPORTES</div>
+      <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Descarga los datos de tus quinielas en formato CSV (Excel).</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <button class="btn btn-b" id="btn-export-jugadores" style="padding:11px;font-size:12px;">👥 Jugadores CSV</button>
+        <button class="btn btn-b" id="btn-export-historial" style="padding:11px;font-size:12px;">📚 Historial CSV</button>
+      </div>
+      <div style="font-size:10px;color:var(--sub);margin-top:8px;">Compatible con Excel, Google Sheets y Numbers.</div>
+    </div>
+
+    <!-- Info -->
+    <div style="background:var(--sur);border-radius:12px;padding:14px 16px;font-size:11px;color:var(--sub);line-height:1.9;">
+      ℹ️ Los datos se guardan en este dispositivo.<br>
+      Usa el backup para mover datos a otro dispositivo.<br>
+      <strong style="color:var(--txt);">Modo veedor:</strong> comparte el link con <code style="color:var(--acc);">?modo=veedor</code>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ CONTABILIDAD ═══ -->
+<div id="v-contabilidad" class="view">
+  <div class="wrap">
+
+    <!-- Resumen de ganancias -->
+    <div class="card" style="border-color:var(--acc)44;background:var(--acc)06;margin-bottom:14px;">
+      <div class="card-lbl">💰 MIS GANANCIAS</div>
+      <div id="cont-resumen" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div>
+    </div>
+
+    <!-- Por quiniela -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-lbl">📊 POR QUINIELA (activas)</div>
+      <div id="cont-por-quiniela"></div>
+    </div>
+
+    <!-- Pagos recibidos -->
+    <div class="card" style="margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div class="card-lbl" style="margin:0;">📅 PAGOS RECIBIDOS</div>
+        <span id="cont-total-badge" class="badge b-g b-sm"></span>
+      </div>
+      <div id="cont-pagos"></div>
+    </div>
+
+    <!-- Premios pagados -->
+    <div class="card">
+      <div class="card-lbl">🏆 PREMIOS PAGADOS (historial)</div>
+      <div id="cont-premios"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ HISTORIAL ═══ -->
+<div id="v-historial" class="view">
+  <div class="wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div class="sec-lbl" style="margin:0;">📚 QUINIELAS TERMINADAS</div>
+      <button class="btn btn-r btn-sm" id="btn-clear-hist">Limpiar</button>
+    </div>
+    <div id="hist-list"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CONFIGURACIÓN
+// ═══════════════════════════════════════════════════════════════════════════════
+var PIN_OK    = "1234";       // <- Cambia tu PIN aquí (se guardará hasheado)
+var WA_NUM    = "526643XXXXXX"; // <- Se sobreescribe desde Configuración
+
+// ─── PLANTILLAS DEFAULT ───────────────────────────────────────────────────────
+var TPL_DEFAULT = {
+  anuncio:
+    "⚽🔥 *¡QUINIELA {evento}!*\n"
+    + "💰 Entrada: ${costo}\n"
+    + "🏆 Premios: 70% · 20% · 10%\n"
+    + "🎯 Desempate: {desempate}\n"
+    + "⏰ Cierre: {cierre}\n\n"
+    + "¿Le entras? 👀🔥",
+  resultados:
+    "🏆 *RESULTADOS — {evento}*\n\n"
+    + "🥇 1°: {1ro} — ${premio1}\n"
+    + "🥈 2°: {2do} — ${premio2}\n"
+    + "🥉 3°: {3ro} — ${premio3}\n\n"
+    + "💰 Bolsa neta: ${bolsa}\n"
+    + "— La Bolsa 🎯",
+  privado:
+    "Hola {nombre}! 👋\n"
+    + "🏆 ¡Ganaste en La Bolsa!\n"
+    + "{evento}\n\n"
+    + "Premio: *${premio}*\n\n"
+    + "Mandame tu CLABE + banco + titular ✅\n"
+    + "— La Bolsa 🎯"
+};
+var COM       = 0.10;         // 10% comisión
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CATÁLOGO DE EVENTOS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// BASE DE DATOS DE EQUIPOS CON ESCUDOS
+// ═══════════════════════════════════════════════════════════════════════════════
+var TEAMS = {
+  "America": {n:"América", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6ae196afb55b09eb207aa_club-america-footballlogos-org.svg", liga:"Liga MX"},
+  "Tigres": {n:"Tigres", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6addd9f5b452adb93892d_tigres-uanl-footballlogos-org.svg", liga:"Liga MX"},
+  "Chivas": {n:"Chivas", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6ad862c8695ed31f99403_cd-guadalajara-footballlogos-org.svg", liga:"Liga MX"},
+  "Cruz Azul": {n:"Cruz Azul", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6ad60d27a5557a26d91df_cruz-azul-footballlogos-org.svg", liga:"Liga MX"},
+  "Pumas": {n:"Pumas", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6adbf464c6be232133f47_unam-pumas-footballlogos-org.svg", liga:"Liga MX"},
+  "Monterrey": {n:"Monterrey", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6ada20138811d116188ff_monterrey-footballlogos-org.svg", liga:"Liga MX"},
+  "Atlas": {n:"Atlas", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6af00091bfe8c61e8c177_atlas-footballlogos-org.svg", liga:"Liga MX"},
+  "Leon": {n:"León", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6ae7ae6f9c76ee51cefc7_club-leon-footballlogos-org.svg", liga:"Liga MX"},
+  "Necaxa": {n:"Necaxa", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6af160eebf2261e3c394c_necaxa-footballlogos-org.svg", liga:"Liga MX"},
+  "Toluca": {n:"Toluca", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6ae59d4ecec0cbb445e6c_toluca-footballlogos-org.svg", liga:"Liga MX"},
+  "Santos": {n:"Santos", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6ae3b6668c3bfe4bbc9cc_santos-laguna-footballlogos-org.svg", liga:"Liga MX"},
+  "Pachuca": {n:"Pachuca", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6aec786a7563b64ed36a2_pachuca-footballlogos-org.svg", liga:"Liga MX"},
+  "Puebla": {n:"Puebla", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6af80e25bca7b498cf894_puebla-footballlogos-org.svg", liga:"Liga MX"},
+  "Mazatlan": {n:"Mazatlán", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6af5c2c42caaf8e11f862_mazatlan-fc-footballlogos-org.svg", liga:"Liga MX"},
+  "San Luis": {n:"San Luis", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6af2e8acd196aeba4e6e6_atletico-san-luis-footballlogos-org.svg", liga:"Liga MX"},
+  "Juarez": {n:"Juárez", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6af449d64bdbc1657d3c8_fc-juarez-footballlogos-org.svg", liga:"Liga MX"},
+  "Queretaro": {n:"Querétaro", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6aee3552e98e2c5810465_queretaro-fc-footballlogos-org.svg", liga:"Liga MX"},
+  "Tijuana": {n:"Tijuana", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6ae97c7b990d3a93f143e_club-tijuana-xolos-footballlogos-org.svg", liga:"Liga MX"},
+  "Arsenal": {n:"Arsenal", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f587db0ac9b956516f0925_arsenal-footballlogos-org.svg", liga:"Premier"},
+  "Chelsea": {n:"Chelsea", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f588edfc3519b543627c40_chelsea-footballlogos-org.svg", liga:"Premier"},
+  "Man City": {n:"Man City", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f58a00d96dabb571b29589_manchester-city-footballlogos-org.svg", liga:"Premier"},
+  "Liverpool": {n:"Liverpool", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f58972e72bf6e25562310a_liverpool-fc-footballlogos-org.svg", liga:"Premier"},
+  "Man United": {n:"Man United", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f58a2606fdd830398bc400_manchester-united-footballlogos-org.svg", liga:"Premier"},
+  "Tottenham": {n:"Tottenham", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f58ade8abeb45efd9e239b_tottenham-hotspur-footballlogos-org.svg", liga:"Premier"},
+  "Newcastle": {n:"Newcastle", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f58a543b232752361d0d0f_newcastle-united-footballlogos-org.svg", liga:"Premier"},
+  "Aston Villa": {n:"Aston Villa", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f5871564515d34fc6e69f4_aston-villa-footballlogos-org.svg", liga:"Premier"},
+  "Brighton": {n:"Brighton", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f587afb29d49b3350c852d_brighton-hove-footballlogos-org.svg", liga:"Premier"},
+  "Everton": {n:"Everton", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f58915f5a5b624ccee6b5f_everton-footballlogos-org.svg", liga:"Premier"},
+  "Fulham": {n:"Fulham", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f58941567204be185ff8f8_fulham-footballlogos-org.svg", liga:"Premier"},
+  "Wolves": {n:"Wolves", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f58b56dfbd72754cd0ee78_wolverhampton-wanderers-footballlogos-org.svg", liga:"Premier"},
+  "Bournemouth": {n:"Bournemouth", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f5873f20f16768d7c35294_bournemouth-footballlogos-org.svg", liga:"Premier"},
+  "Crystal Palace": {n:"Crystal Palace", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f589acb13a0d71ea6cac6d_crystal-palace-footballlogos-org.svg", liga:"Premier"},
+  "Brentford": {n:"Brentford", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f5876ba35f811cb20b28d7_brentford-footballlogos-org.svg", liga:"Premier"},
+  "West Ham": {n:"West Ham", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f58b0b219f9a58ee0a1496_west-ham-united-footballlogos-org.svg", liga:"Premier"},
+  "Nottm Forest": {n:"Nottm Forest", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f58a81b5c9d747c138cd6e_nottingham-forest-footballlogos-org.svg", liga:"Premier"},
+  "Sunderland": {n:"Sunderland", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f58aaddd34744d0aa4abb0_sunderland-footballlogos-org.svg", liga:"Premier"},
+  "Real Madrid": {n:"Real Madrid", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f5566127330a66b90dd22a_real-madrid-footballlogos-org.svg", liga:"La Liga"},
+  "Barcelona": {n:"Barcelona", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f5633874f0b7adc82bc7f5_fc-barcelona-footballlogos-org.svg", liga:"La Liga"},
+  "Atletico": {n:"Atlético", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f57af0f0a79fd0b2730ff9_atletico-madrid-footballlogos-org.svg", liga:"La Liga"},
+  "Sevilla": {n:"Sevilla", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f57d4cd858cff37cd779c0_sevilla-fc-footballlogos-org.svg", liga:"La Liga"},
+  "Villarreal": {n:"Villarreal", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f5645af887e78f3cd662aa_villarreal-cf-footballlogos-org.svg", liga:"La Liga"},
+  "Athletic": {n:"Athletic", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f575e7dfbd72754ccedd4b_athletic-club-bilbao-footballlogos-org.svg", liga:"La Liga"},
+  "Real Betis": {n:"Real Betis", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f565453009119bd69ad094_real-betis-footballlogos-org.svg", liga:"La Liga"},
+  "Real Sociedad": {n:"Real Sociedad", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f57cd739e52d48a094280a_real-sociedad-footballlogos-org.svg", liga:"La Liga"},
+  "Osasuna": {n:"Osasuna", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f57679889b70d360e72166_osasuna-footballlogos-org.svg", liga:"La Liga"},
+  "Girona": {n:"Girona", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f578d137184118286bdbd3_girona-fc-footballlogos-org.svg", liga:"La Liga"},
+  "Valencia": {n:"Valencia", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f57de41df577c3ea306a66_valencia-cf-footballlogos-org.svg", liga:"La Liga"},
+  "Celta Vigo": {n:"Celta Vigo", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f573ceae8839f16958ef48_celta-vigo-footballlogos-org.svg", liga:"La Liga"},
+  "Getafe": {n:"Getafe", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f57702504a85f4611ace49_getafe-cf-footballlogos-org.svg", liga:"La Liga"},
+  "Mallorca": {n:"Mallorca", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f57c3a3b1afcf27c976889_rcd-mallorca-footballlogos-org.svg", liga:"La Liga"},
+  "Rayo Vallecano": {n:"Rayo Vallecano", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f579a9900b7b793a032ad7_rayo-vallecano-footballlogos-org.svg", liga:"La Liga"},
+  "Alaves": {n:"Alavés", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f574ca1aefe1dd0d84e203_deportivo-alaves-footballlogos-org.svg", liga:"La Liga"},
+  "Espanol": {n:"Español", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f57a67c9d4dd212a36c0b2_rcd-espanyol-footballlogos-org.svg", liga:"La Liga"},
+  "Bayern": {n:"Bayern", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f59397e06d4f150c04e9ef_bayern-munich-footballlogos-org.svg", liga:"Bundesliga"},
+  "Dortmund": {n:"Dortmund", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f592de82d343819638e02b_borussia-dortmund-footballlogos-org.svg", liga:"Bundesliga"},
+  "Leverkusen": {n:"Leverkusen", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f5936c1aefe1dd0d87de61_bayer-leverkusen-footballlogos-org.svg", liga:"Bundesliga"},
+  "Bayer Leverkusen": {n:"Bayer Leverkusen", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f5936c1aefe1dd0d87de61_bayer-leverkusen-footballlogos-org.svg", liga:"Bundesliga"},
+  "RB Leipzig": {n:"RB Leipzig", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f59307077ea147881d22ca_rb-leipzig-footballlogos-org.svg", liga:"Bundesliga"},
+  "Eintracht": {n:"Eintracht", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f593f8118d684746a9e037_eintracht-frankfurt-footballlogos-org.svg", liga:"Bundesliga"},
+  "Stuttgart": {n:"Stuttgart", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f593c313829fe52be9d3dd_vfb-stuttgart-footballlogos-org.svg", liga:"Bundesliga"},
+  "Wolfsburg": {n:"Wolfsburg", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f5942cbf633265eee2a819_wfl-wolfsburg-footballlogos-org.svg", liga:"Bundesliga"},
+  "Freiburg": {n:"Freiburg", img:"https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f5947c900b7b793a059a1a_sc-freiburg-footballlogos-org.svg", liga:"Bundesliga"},
+};
+
+function getTeam(key) {
+  if(!key) return null;
+  if(TEAMS[key]) return TEAMS[key];
+  var lower = key.toLowerCase();
+  for(var k in TEAMS) {
+    if(k.toLowerCase()===lower || TEAMS[k].n.toLowerCase()===lower) return TEAMS[k];
+  }
+  return null;
+}
+
+var EVTS = [
+  // ══ ACTIVOS ══════════════════════════════════════════════════════════════
+  {
+    id:"ligamx", n:"Liga MX", ic:"⚽", c:"#006847",
+    costo:100, activo:true, cierre:"Sab 22 Mar 17:00", desc:"Jornada 12 · Clausura 2026",
+    empate:true, desTipo:"numero", desLbl:"Total goles en la jornada",
+    matchups:[
+      {id:1,L:"Necaxa",   V:"Tijuana"},  {id:2,L:"Mazatlan", V:"Cruz Azul"},
+      {id:3,L:"Atlas",    V:"Queretaro"},{id:4,L:"San Luis", V:"Leon"},
+      {id:5,L:"Monterrey",V:"Chivas"},   {id:6,L:"Pumas",    V:"America"},
+      {id:7,L:"Pachuca",  V:"Toluca"},   {id:8,L:"Santos",   V:"Puebla"},
+      {id:9,L:"Juarez",   V:"Tigres"}
+    ]
+  },
+  {
+    id:"premier", n:"Premier League", ic:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", c:"#3D195B",
+    costo:100, activo:true, cierre:"Dom 22 Mar 10:00", desc:"Jornada 31 · 2025-26",
+    empate:true, desTipo:"numero", desLbl:"Total goles en la jornada",
+    matchups:[
+      {id:1,L:"Arsenal",     V:"Chelsea",        estelar:true},
+      {id:2,L:"Man City",    V:"Liverpool"},      {id:3,L:"Man United",V:"Tottenham"},
+      {id:4,L:"Newcastle",   V:"Aston Villa"},    {id:5,L:"Brighton",  V:"Everton"},
+      {id:6,L:"Bournemouth", V:"Fulham"},         {id:7,L:"Brentford", V:"Crystal Palace"},
+      {id:8,L:"Wolves",      V:"Ipswich"},        {id:9,L:"Leicester", V:"Southampton"},
+      {id:10,L:"West Ham",   V:"Nottm Forest"}
+    ]
+  },
+  {
+    id:"laliga", n:"La Liga", ic:"🇪🇸", c:"#C8102E",
+    costo:100, activo:true, cierre:"Dom 22 Mar 10:00", desc:"Jornada 29 · 2025-26",
+    empate:true, desTipo:"numero", desLbl:"Total goles en la jornada",
+    matchups:[
+      {id:1,L:"Real Madrid",  V:"Atletico",       estelar:true},
+      {id:2,L:"Barcelona",    V:"Sevilla"},        {id:3,L:"Villarreal",V:"Athletic"},
+      {id:4,L:"Real Betis",   V:"Osasuna"},        {id:5,L:"Girona",    V:"Valencia"},
+      {id:6,L:"Getafe",       V:"Rayo Vallecano"}, {id:7,L:"Mallorca",  V:"Celta Vigo"},
+      {id:8,L:"Las Palmas",   V:"Leganes"},        {id:9,L:"Alaves",    V:"Espanol"},
+      {id:10,L:"Valladolid",  V:"Real Sociedad"}
+    ]
+  },
+  {
+    id:"champions", n:"Champions League", ic:"⭐", c:"#001489",
+    costo:100, activo:true, cierre:"Jue 18 Mar 14:00", desc:"Octavos de Final · 2025-26",
+    empate:false, desTipo:"numero", desLbl:"Total goles en la jornada",
+    matchups:[
+      {id:1,L:"Real Madrid", V:"Man City",   estelar:true},
+      {id:2,L:"Bayern",      V:"Arsenal"},
+      {id:3,L:"PSG",         V:"Atletico"},
+      {id:4,L:"Liverpool",   V:"Inter"},
+      {id:5,L:"Dortmund",    V:"Barcelona"},
+      {id:6,L:"Leverkusen",  V:"Benfica"}
+    ]
+  },
+  {
+    id:"combo_eu", n:"Combo Europeo", ic:"🌍", c:"#1A237E",
+    costo:100, activo:true, cierre:"Dom 22 Mar 10:00",
+    desc:"Premier · LaLiga · SerieA · Bundesliga · Ligue1 · Eredivisie · Portugal",
+    empate:true, desTipo:"numero", desLbl:"Total goles en los 12 partidos",
+    matchups:[
+      {id:1,  L:"Arsenal",         V:"Chelsea",      estelar:true},
+      {id:2,  L:"Man City",        V:"Liverpool"},
+      {id:3,  L:"Real Madrid",     V:"Atletico"},
+      {id:4,  L:"Barcelona",       V:"Sevilla"},
+      {id:5,  L:"Inter",           V:"AC Milan"},
+      {id:6,  L:"Juventus",        V:"Napoli"},
+      {id:7,  L:"Bayern",          V:"Dortmund"},
+      {id:8,  L:"Bayer Leverkusen",V:"RB Leipzig"},
+      {id:9,  L:"PSG",             V:"Marseille"},
+      {id:10, L:"Monaco",          V:"Lille"},
+      {id:11, L:"Ajax",            V:"PSV"},
+      {id:12, L:"Benfica",         V:"Porto"}
+    ]
+  },
+  {
+    id:"ufc_fn271", n:"UFC Fight Night 271", ic:"🥊", c:"#B71C1C",
+    costo:100, activo:true, cierre:"Sab 28 Mar 18:00", desc:"Adesanya vs Pyfer · Seattle",
+    tipo:"ufc", empate:false, desTipo:"metodo", desLbl:"Metodo de victoria por pelea",
+    desOpts:["KO/TKO","Decision","Sumision","Sin concluir"],
+    matchups:[
+      {id:1,L:"Israel Adesanya",    V:"Joe Pyfer",       estelar:true},
+      {id:2,L:"Alexa Grasso",       V:"Maycee Barber"},
+      {id:3,L:"Ricky Simon",        V:"Adrian Yanez"},
+      {id:4,L:"Chase Hooper",       V:"Lance Gibson Jr."},
+      {id:5,L:"Ignacio Bahamondes", V:"Tofiq Musayev"},
+      {id:6,L:"Terrance McKinney",  V:"Kyle Nelson"}
+    ]
+  },
+  {
+    id:"mundial_j1", n:"Mundial 2026 · Jornada 1", ic:"🌍", c:"#B8860B",
+    costo:100, activo:true, fecha:"13 Jun",
+    cierre:"Vie 13 Jun 10:00", desc:"Fase de Grupos · Semana 1",
+    empate:true, desTipo:"numero", desLbl:"Total goles en la jornada", desPh:"Ej: 10",
+    matchups:[
+      {id:1, L:"Mexico",    V:"Polonia",        estelar:true},
+      {id:2, L:"USA",       V:"Panama"},
+      {id:3, L:"Argentina", V:"Ecuador"},
+      {id:4, L:"Brazil",    V:"Colombia"},
+      {id:5, L:"Spain",     V:"Belgium"},
+      {id:6, L:"France",    V:"Australia"},
+      {id:7, L:"Germany",   V:"Japan"},
+      {id:8, L:"England",   V:"Serbia"}
+    ]
+  },
+  {
+    id:"mundial_j2", n:"Mundial 2026 · Jornada 2", ic:"🌍", c:"#B8860B",
+    costo:100, activo:false, fecha:"18 Jun",
+    cierre:"Mie 18 Jun 10:00", desc:"Fase de Grupos · Semana 2",
+    empate:true, desTipo:"numero", desLbl:"Total goles en la jornada", desPh:"Ej: 12",
+    matchups:[
+      {id:1, L:"Mexico",    V:"Grupo B rival", estelar:true},
+      {id:2, L:"USA",       V:"Uruguay"},
+      {id:3, L:"Argentina", V:"Chile"},
+      {id:4, L:"Brazil",    V:"Peru"},
+      {id:5, L:"Spain",     V:"Portugal"},
+      {id:6, L:"France",    V:"Denmark"},
+      {id:7, L:"Germany",   V:"Netherlands"},
+      {id:8, L:"England",   V:"Croatia"}
+    ]
+  },
+  {
+    id:"mundial_j3", n:"Mundial 2026 · Jornada 3", ic:"🌍", c:"#B8860B",
+    costo:100, activo:false, fecha:"25 Jun",
+    cierre:"Mie 25 Jun 10:00", desc:"Fase de Grupos · Ultima jornada",
+    empate:true, desTipo:"numero", desLbl:"Total goles en la jornada", desPh:"Ej: 14",
+    matchups:[
+      {id:1, L:"Mexico",    V:"Grupo B rival", estelar:true},
+      {id:2, L:"USA",       V:"Grupo C rival"},
+      {id:3, L:"Argentina", V:"Grupo F rival"},
+      {id:4, L:"Brazil",    V:"Grupo G rival"},
+      {id:5, L:"Spain",     V:"Belgium"},
+      {id:6, L:"France",    V:"Grupo I rival"},
+      {id:7, L:"Germany",   V:"Grupo E rival"},
+      {id:8, L:"England",   V:"Grupo F rival"}
+    ]
+  },
+  {
+    id:"mundial_camp", n:"Quien gana el Mundial?", ic:"🏆", c:"#B8860B",
+    costo:100, activo:true, cierre:"Vie 13 Jun 10:00",
+    desc:"Elige 1ro 2do 3ro · Paga en la Final",
+    tipo:"mundial",
+    desLbl:"Total goles anotados en todo el Mundial",
+    opciones:[
+      {flag:"🇲🇽",n:"Mexico"},{flag:"🇦🇷",n:"Argentina"},{flag:"🇧🇷",n:"Brazil"},
+      {flag:"🇫🇷",n:"Francia"},{flag:"🇪🇸",n:"Espana"},{flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",n:"Inglaterra"},
+      {flag:"🇩🇪",n:"Alemania"},{flag:"🇵🇹",n:"Portugal"},{flag:"🇺🇸",n:"USA"},
+      {flag:"🇳🇱",n:"Holanda"},{flag:"🇺🇾",n:"Uruguay"},{flag:"🇨🇴",n:"Colombia"},
+      {flag:"🇯🇵",n:"Japon"},{flag:"🇲🇦",n:"Marruecos"},{flag:"🇧🇪",n:"Belgica"},
+      {flag:"🇨🇱",n:"Chile"},{flag:"🇪🇨",n:"Ecuador"},{flag:"🇵🇦",n:"Panama"},
+      {flag:"🇭🇷",n:"Croacia"},{flag:"🇸🇦",n:"Arabia Saudita"}
+    ],
+    lugares:[
+      {id:"p1",lbl:"🥇 1er Lugar",estelar:true},
+      {id:"p2",lbl:"🥈 2do Lugar"},
+      {id:"p3",lbl:"🥉 3er Lugar"}
+    ],
+    matchups:[
+      {id:"p1",L:"1er Lugar",V:"Seleccion",estelar:true},
+      {id:"p2",L:"2do Lugar",V:"Seleccion"},
+      {id:"p3",L:"3er Lugar",V:"Seleccion"}
+    ]
+  },
+  // ══ PRÓXIMOS ═════════════════════════════════════════════════════════════
+  {
+    id:"premier_n2", n:"Premier League", ic:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", c:"#3D195B",
+    costo:100, activo:false, cierre:"Dom 5 Abr 10:00", desc:"Jornada 32 · El Derby",
+    empate:true, desTipo:"numero", desLbl:"Total goles en la jornada",
+    matchups:[
+      {id:1,L:"Liverpool",  V:"Man United",   estelar:true},
+      {id:2,L:"Arsenal",    V:"Man City"},     {id:3,L:"Chelsea",     V:"Tottenham"},
+      {id:4,L:"Newcastle",  V:"Brighton"},     {id:5,L:"Aston Villa", V:"Fulham"},
+      {id:6,L:"Everton",    V:"Wolves"},       {id:7,L:"Crystal Palace",V:"Brentford"},
+      {id:8,L:"Nottm Forest",V:"Bournemouth"}, {id:9,L:"Southampton", V:"Leicester"},
+      {id:10,L:"Ipswich",   V:"West Ham"}
+    ]
+  },
+  {
+    id:"laliga_n2", n:"La Liga", ic:"🇪🇸", c:"#C8102E",
+    costo:100, activo:false, cierre:"Dom 5 Abr 10:00", desc:"Jornada 30 · El Clasico",
+    empate:true, desTipo:"numero", desLbl:"Total goles en la jornada",
+    matchups:[
+      {id:1,L:"Barcelona",     V:"Real Madrid",    estelar:true},
+      {id:2,L:"Atletico",      V:"Sevilla"},        {id:3,L:"Athletic",   V:"Villarreal"},
+      {id:4,L:"Osasuna",       V:"Real Betis"},     {id:5,L:"Valencia",   V:"Girona"},
+      {id:6,L:"Rayo Vallecano",V:"Getafe"},         {id:7,L:"Celta Vigo", V:"Mallorca"},
+      {id:8,L:"Leganes",       V:"Las Palmas"},     {id:9,L:"Espanol",    V:"Alaves"},
+      {id:10,L:"Real Sociedad",V:"Valladolid"}
+    ]
+  },
+  {
+    id:"ufc_327", n:"UFC 327", ic:"🏆", c:"#B71C1C",
+    costo:100, activo:false, cierre:"Sab 11 Abr 18:00", desc:"Prochazka vs Ulberg · PPV",
+    empate:false, desTipo:"metodo", desLbl:"Como termina la pelea estelar",
+    desOpts:["KO/TKO","Decision","Sumision","Sin concluir"],
+    matchups:[
+      {id:1,L:"Jiri Prochazka",V:"Carlos Ulberg", estelar:true},
+      {id:2,L:"Burns",         V:"Malott"},        {id:3,L:"Sterling",V:"Zalal"},
+      {id:4,L:"Pereira",       V:"TBD"},           {id:5,L:"Moicano", V:"Duncan"}
+    ]
+  },
+  {
+    id:"supernova", n:"Supernova: Genesis", ic:"⭐", c:"#B45309",
+    costo:100, activo:false, cierre:"Dom 26 Abr 18:00", desc:"Arena CDMX · Netflix",
+    empate:false, desTipo:"metodo", desLbl:"Como termina la pelea estelar",
+    desOpts:["KO/TKO","Decision","Sumision","Sin concluir"],
+    matchups:[
+      {id:1,L:"Alana Flores",     V:"Flor Vigna",   estelar:true},
+      {id:2,L:"Mario Bautista",   V:"Aaron Mercury"},
+      {id:3,L:"Lupita Villalobos",V:"Kim Shantal"},
+      {id:4,L:"Victor Ordonez",   V:"Guillermo Pena"},
+      {id:5,L:"ElAbraham",        V:"Nando"},
+      {id:6,L:"Milica",           V:"Ari Geli"}
+    ]
+  },
+  {
+    id:"ufc_328", n:"UFC 328", ic:"🏆", c:"#B71C1C",
+    costo:100, activo:false, cierre:"Por confirmar", desc:"Chimaev vs Strickland · PPV",
+    empate:false, desTipo:"metodo", desLbl:"Como termina la pelea estelar",
+    desOpts:["KO/TKO","Decision","Sumision","Sin concluir"],
+    matchups:[
+      {id:1,L:"Khamzat Chimaev",V:"Sean Strickland", estelar:true},
+      {id:2,L:"Allen",          V:"Costa"},
+      {id:3,L:"Song",           V:"Figueiredo"},
+      {id:4,L:"Muhammad",       V:"Bonfim"},
+      {id:5,L:"TBD",            V:"TBD"}
+    ]
+  },
+  {
+    id:"velada5", n:"La Velada del Ano V", ic:"🎭", c:"#1A0533",
+    costo:100, activo:false, cierre:"Jun 2026", desc:"Ibai · España",
+    empate:false, desTipo:"metodo", desLbl:"Como termina la pelea estelar",
+    desOpts:["KO/TKO","Decision","Sumision","Sin concluir"],
+    matchups:[
+      {id:1,L:"Ibai",    V:"Auronplay", estelar:true},
+      {id:2,L:"TheGrefg",V:"Coscu"},
+      {id:3,L:"Rivers",  V:"Nissaxter"}
+    ]
+  },
+  {
+    id:"champ_final", n:"Champions League Final", ic:"🏆", c:"#001489",
+    costo:100, activo:false, cierre:"Sab 30 May 14:00", desc:"Final · Munich 2026",
+    empate:false, desTipo:"numero", desLbl:"Total goles incluyendo prorroga",
+    matchups:[
+      {id:1,L:"TBD Europa 1",V:"TBD Europa 2", estelar:true},
+      {id:2,L:"Goles 1T",    V:"Goles 2T"}
+    ]
+  },
+  {
+    id:"nba", n:"NBA Playoffs", ic:"🏀", c:"#C85200",
+    costo:100, activo:false, cierre:"Por confirmar", desc:"4 series activas",
+    empate:false, desTipo:"numero", desLbl:"Total puntos en la jornada",
+    matchups:[
+      {id:1,L:"Celtics",V:"Heat"},{id:2,L:"Nuggets",V:"Lakers"},{id:3,L:"Bucks",V:"76ers"}
+    ]
+  },
+  {
+    id:"superbowl", n:"Super Bowl LX", ic:"💍", c:"#0A1A3A",
+    costo:100, activo:false, cierre:"Feb 2027", desc:"El juego mas grande del ano",
+    empate:false, desTipo:"numero", desLbl:"Total puntos en el juego",
+    matchups:[{id:1,L:"AFC Campeon",V:"NFC Campeon"}]
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════════════════════════════════════════════
+var datos  = {};   // { evId: { participantes:[], resultados:{}, desReal:null } }
+var PAGO   = {};
+var curId  = null;
+var histSemanas = [];
+
+var PAGO_DEF = {
+  spei:    {on:true, ic:"🏦", n:"SPEI",         col:"#4A9EFF", flds:[{k:"clabe",ph:"CLABE 18 digitos"},{k:"banco",ph:"Banco"},{k:"titular",ph:"Titular"}], v:{clabe:"",banco:"",titular:""}},
+  mp:      {on:false,ic:"💙", n:"Mercado Pago",  col:"#009EE3", flds:[{k:"link",ph:"Link o usuario"},{k:"titular",ph:"Titular"}], v:{link:"",titular:""}},
+  tarjeta: {on:false,ic:"💳", n:"Tarjeta",       col:"#A259FF", flds:[{k:"num",ph:"Numero de tarjeta"},{k:"banco",ph:"Banco"},{k:"titular",ph:"Titular"}], v:{num:"",banco:"",titular:""}},
+  oxxo:    {on:false,ic:"🏪", n:"Oxxo",          col:"#00E676", flds:[{k:"ref",ph:"Referencia o tarjeta"},{k:"titular",ph:"A nombre de"}], v:{ref:"",titular:""}}
+};
+
+function loadConfig() {
+  try {
+    var wa = localStorage.getItem('lb_wa_num');
+    if(wa) WA_NUM = wa;
+    var pin = localStorage.getItem('lb_pin_code');
+    if(pin) PIN_OK = pin;
+    // Migrate old pin to hash if not done yet
+    if(pin && !localStorage.getItem('lb_pin_hash')) {
+      localStorage.setItem('lb_pin_hash', simpleHash(pin));
+    }
+  } catch(e) {}
+}
+
+function loadTPL(key) {
+  try {
+    var saved = localStorage.getItem('lb_tpl_' + key);
+    return saved || TPL_DEFAULT[key];
+  } catch(e) { return TPL_DEFAULT[key]; }
+}
+
+function saveTPL(key, val) {
+  try { localStorage.setItem('lb_tpl_' + key, val); } catch(e) {}
+}
+
+function applyTPL(msg, vars) {
+  return msg
+    .replace(/{evento}/g,   vars.evento   || '')
+    .replace(/{costo}/g,    vars.costo    || '')
+    .replace(/{cierre}/g,   vars.cierre   || '')
+    .replace(/{desempate}/g,vars.desempate|| '')
+    .replace(/{bolsa}/g,    vars.bolsa    || '')
+    .replace(/{1ro}/g,      vars.g1       || '—')
+    .replace(/{2do}/g,      vars.g2       || '—')
+    .replace(/{3ro}/g,      vars.g3       || '—')
+    .replace(/{premio1}/g,  vars.p1       || '0')
+    .replace(/{premio2}/g,  vars.p2       || '0')
+    .replace(/{premio3}/g,  vars.p3       || '0')
+    .replace(/{nombre}/g,   vars.nombre   || '')
+    .replace(/{premio}/g,   vars.premio   || '0');
+}
+
+function initState() {
+  EVTS.forEach(function(e) {
+    datos[e.id] = { participantes:[], resultados:{}, desReal:null };
+  });
+  try { var s=localStorage.getItem('lb_pago'); PAGO = s ? JSON.parse(s) : JSON.parse(JSON.stringify(PAGO_DEF)); }
+  catch(e) { PAGO = JSON.parse(JSON.stringify(PAGO_DEF)); }
+  try {
+    var h=localStorage.getItem('lb_hist_sem');
+    histSemanas = h ? JSON.parse(h) : [];
+  } catch(e) { histSemanas=[]; }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
+var $ = function(id){ return document.getElementById(id); };
+function generarCodigo(nombre, eventoId) {
+  var initials = nombre.trim().split(' ').map(function(w){ return w.charAt(0).toUpperCase(); }).join('').slice(0,3);
+  var ts = Date.now().toString(36).toUpperCase().slice(-4);
+  var evKey = eventoId.replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,6);
+  return 'LB-' + evKey + '-' + initials + ts;
+}
+
+var getEv = function(id){ return EVTS.find(function(e){return e.id===id;}); };
+var dat   = function(id){ return datos[id] || {participantes:[],resultados:{},desReal:null}; };
+var pags  = function(id){ return dat(id).participantes.filter(function(p){return p.pagado;}); };
+var pends = function(id){ return dat(id).participantes.filter(function(p){return !p.pagado;}); };
+var fmt   = function(n){ return '$'+Math.round(n).toLocaleString(); };
+
+function cpText(btn, text) {
+  navigator.clipboard && navigator.clipboard.writeText(text).catch(function(){});
+  var orig=btn.textContent; btn.textContent='✓ Copiado';
+  setTimeout(function(){ btn.textContent=orig; }, 2000);
+}
+
+function showModal(html) {
+  var bg=document.createElement('div'); bg.className='modal-bg';
+  bg.innerHTML='<div class="modal-box">'+html+'</div>';
+  document.body.appendChild(bg);
+  bg.addEventListener('click',function(ev){ if(ev.target===bg) document.body.removeChild(bg); });
+  bg.querySelector('[data-close]') && bg.querySelector('[data-close]').addEventListener('click',function(){ document.body.removeChild(bg); });
+  return bg;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CÁLCULO SCORES Y GANADORES
+// ═══════════════════════════════════════════════════════════════════════════════
+function calcScore(p, id) {
+  var e=getEv(id), d=dat(id);
+  var ac = 0;
+
+  // Mundial — aciertos en podio
+  if(e.tipo==='mundial') {
+    (e.lugares||[]).forEach(function(l){
+      var res = d.resultados && d.resultados[l.id];
+      if(res && p.picks && p.picks[l.id] && res===p.picks[l.id]) ac++;
+    });
+  }
+  // UFC — aciertos en ganador + método
+  else if(e.tipo==='ufc') {
+    e.matchups.forEach(function(m){
+      var res = d.resultados && d.resultados[m.id];
+      var pp  = p.picks && p.picks[m.id];
+      if(!res || !pp) return;
+      if(res.win && pp.win && res.win===pp.win) ac++;     // +1 ganador
+      if(res.met && pp.met && res.met===pp.met) ac++;     // +1 método
+    });
+  }
+  // Normal
+  else {
+    e.matchups.forEach(function(m){
+      var r=d.resultados[m.id];
+      if(r && r.resultado && p.picks && p.picks[m.id] && r.resultado===p.picks[m.id]) ac++;
+    });
+  }
+
+  var diff=9999;
+  if(d.desReal!=null && p.desempate!=null)
+    diff=Math.abs(Number(d.desReal)-Number(p.desempate));
+  return Object.assign({},p,{ac:ac,diff:diff});
+}
+
+function calcGans(id) {
+  var e=getEv(id), d=dat(id), pg=pags(id);
+  var hayRes=e.matchups.some(function(m){ return d.resultados[m.id] && d.resultados[m.id].resultado; });
+  if(!pg.length || !hayRes) return [];
+  var neta=pg.length*e.costo*(1-COM);
+  var sc=pg.map(function(p){return calcScore(p,id);}).sort(function(a,b){return b.ac-a.ac||a.diff-b.diff;});
+  var pools=[neta*.7,neta*.2,neta*.1], grps=[], out=[];
+  var i=0;
+  while(i<sc.length){
+    var c=sc[i], g=[c]; var j=i+1;
+    while(j<sc.length && sc[j].ac===c.ac && sc[j].diff===c.diff) g.push(sc[j++]);
+    grps.push(g); i=j;
+  }
+  grps.forEach(function(g,gi){
+    if(gi>=3){ g.forEach(function(p){out.push(Object.assign({},p,{pos:gi+1,premio:0}));}); return; }
+    var pool=0; for(var k=gi;k<Math.min(gi+g.length,3);k++) pool+=pools[k];
+    var sh=Math.round(pool/g.length);
+    g.forEach(function(p){out.push(Object.assign({},p,{pos:gi+1,premio:sh}));});
+  });
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PIN DE ACCESO
+// ═══════════════════════════════════════════════════════════════════════════════
+var pinActual = '';
+
+function initPIN() {
+  var esVeedor = window.location.search.indexOf('veedor')!==-1;
+  if(esVeedor){
+    $('pin-overlay').style.display='none';
+    $('veedor-badge').style.display='inline-flex';
+    window._veedor=true;
+    return;
+  }
+  try {
+    if(sessionStorage.getItem('lb_pin')===PIN_OK){
+      $('pin-overlay').style.display='none'; return;
+    }
+  } catch(e){}
+  var pad=$('pin-pad');
+  [1,2,3,4,5,6,7,8,9,'',0,'⌫'].forEach(function(k){
+    var b=document.createElement('button'); b.className='pin-key'; b.textContent=k;
+    if(k===''){b.style.visibility='hidden';}
+    b.addEventListener('click',function(){
+      if(k==='⌫') pinActual=pinActual.slice(0,-1);
+      else if(k!=='' && pinActual.length<4) pinActual+=k;
+      updateDots(); if(pinActual.length===4) checkPIN();
+    });
+    pad.appendChild(b);
+  });
+  $('pin-clear-btn').addEventListener('click',function(){ pinActual=''; updateDots(); });
+}
+
+function updateDots() {
+  document.querySelectorAll('.pin-dot').forEach(function(d,i){
+    d.className='pin-dot'+(i<pinActual.length?' filled':'');
+    d.style.background=''; d.style.borderColor='';
+  });
+}
+
+function simpleHash(str) {
+  var h = 0;
+  for(var i=0; i<str.length; i++) {
+    h = ((h << 5) - h) + str.charCodeAt(i);
+    h = h & h;
+  }
+  return Math.abs(h).toString(36);
+}
+
+function checkPIN() {
+  var storedHash = (function(){ try{ return localStorage.getItem('lb_pin_hash'); }catch(e){return null;} })();
+  var inputHash  = simpleHash(pinActual);
+  // If no hash stored yet, compare against default and store hash
+  if(!storedHash) {
+    if(pinActual === PIN_OK) {
+      try{ localStorage.setItem('lb_pin_hash', simpleHash(PIN_OK)); sessionStorage.setItem('lb_pin', PIN_OK); }catch(e){}
+      $('pin-overlay').style.display='none';
+    } else {
+      $('pin-error').textContent='PIN incorrecto';
+    document.querySelectorAll('.pin-dot').forEach(function(d){
+      d.style.background='#FF3B5C'; d.style.borderColor='#FF3B5C';
+    });
+    setTimeout(function(){ pinActual=''; updateDots(); $('pin-error').textContent=''; },900);
+    }
+    return;
+  }
+  // Hash stored — compare hashes
+  if(inputHash === storedHash) {
+    try{ sessionStorage.setItem('lb_pin', pinActual); }catch(e){}
+    $('pin-overlay').style.display='none';
+  } else {
+    $('pin-error').textContent='PIN incorrecto';
+    document.querySelectorAll('.pin-dot').forEach(function(d){
+      d.style.background='#FF3B5C'; d.style.borderColor='#FF3B5C';
+    });
+    setTimeout(function(){ pinActual=''; updateDots(); $('pin-error').textContent=''; },900);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// TEMA
+// ═══════════════════════════════════════════════════════════════════════════════
+var isDark=true;
+function initTheme(){
+  try{ isDark=localStorage.getItem('lb_admin_theme')!=='light'; }catch(e){}
+  applyTheme();
+}
+function applyTheme(){
+  document.body.classList.toggle('light',!isDark);
+  $('btn-theme').textContent=isDark?'🌙':'☀️';
+}
+$('btn-theme').addEventListener('click',function(){
+  isDark=!isDark; applyTheme();
+  try{ localStorage.setItem('lb_admin_theme',isDark?'dark':'light'); }catch(e){}
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// NAVEGACIÓN
+// ═══════════════════════════════════════════════════════════════════════════════
+function showView(id) {
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('on');});
+  $(id).classList.add('on');
+}
+
+function goHome() {
+  showView('v-home'); renderHome();
+  document.querySelectorAll('.tnb').forEach(function(b){b.classList.toggle('on',b.dataset.view==='home');});
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// HOME — RENDER
+// ═══════════════════════════════════════════════════════════════════════════════
+function globalStats() {
+  var tj=0,tb=0,tc=0;
+  EVTS.forEach(function(e){
+    var pg=pags(e.id).length;
+    tj+=dat(e.id).participantes.length;
+    tb+=pg*e.costo; tc+=pg*e.costo*COM;
+  });
+  return {tj:tj,tb:tb,tc:tc};
+}
+
+// ─── MÉTRICAS POR QUINIELA ───────────────────────────────────────────────────
+function renderDesglose() {
+  var rows = EVTS.map(function(e) {
+    var pg  = pags(e.id).length;
+    var pnd = pends(e.id).length;
+    var bolsa = pg * e.costo;
+    var com   = bolsa * COM;
+    return { e:e, pg:pg, pnd:pnd, bolsa:bolsa, com:com, total:dat(e.id).participantes.length };
+  }).filter(function(r){ return r.total > 0 || r.e.activo; });
+
+  // Ordenar por bolsa desc para ver popularidad
+  rows.sort(function(a,b){ return b.bolsa - a.bolsa; });
+
+  var totalRows = rows.filter(function(r){ return r.total > 0; });
+  var masPopular = totalRows.length ? totalRows[0].e.n : null;
+
+  if(masPopular) {
+    var badge = $('popularidad-badge');
+    if(badge) badge.innerHTML = '🔥 Más popular: <strong style="color:var(--acc);">' + masPopular + '</strong>';
+  }
+
+  var list = $('desglose-list');
+  if(!list) return;
+
+  if(!rows.filter(function(r){return r.total>0;}).length) {
+    list.innerHTML = '<div style="text-align:center;color:var(--sub);font-size:12px;padding:16px 0;">'
+      + 'Sin jugadores aún · Los datos aparecen conforme confirmes pagos</div>';
+    return;
+  }
+
+  var h = '<div style="overflow-x:auto;">'
+    + '<table style="width:100%;border-collapse:collapse;font-size:12px;">'
+    + '<thead><tr style="border-bottom:2px solid var(--brd);">'
+    + '<th style="text-align:left;padding:6px 8px;color:var(--sub);font-size:9px;letter-spacing:1px;">QUINIELA</th>'
+    + '<th style="text-align:center;padding:6px 4px;color:var(--sub);font-size:9px;">JUGADORES</th>'
+    + '<th style="text-align:right;padding:6px 8px;color:var(--sub);font-size:9px;">BOLSA</th>'
+    + '<th style="text-align:right;padding:6px 8px;color:var(--acc);font-size:9px;">COMISIÓN</th>'
+    + '<th style="text-align:center;padding:6px 4px;color:var(--sub);font-size:9px;">STATUS</th>'
+    + '</tr></thead><tbody>';
+
+  var totalBolsa = 0, totalCom = 0;
+
+  rows.forEach(function(r, i) {
+    if(r.total === 0 && !r.e.activo) return;
+    totalBolsa += r.bolsa;
+    totalCom   += r.com;
+
+    // Barra de popularidad relativa
+    var maxBolsa = Math.max.apply(null, rows.map(function(x){return x.bolsa;})) || 1;
+    var barPct   = Math.round((r.bolsa / maxBolsa) * 100);
+
+    h += '<tr style="border-bottom:1px solid var(--brd);">'
+      + '<td style="padding:8px 8px;">'
+      +   '<div style="display:flex;align-items:center;gap:6px;">'
+      +   '<span style="font-size:14px;">' + r.e.ic + '</span>'
+      +   '<div>'
+      +   '<div style="font-weight:700;font-size:12px;">' + r.e.n + '</div>'
+      +   '<div style="height:3px;background:var(--brd);border-radius:2px;margin-top:3px;width:80px;">'
+      +   '<div style="height:100%;width:' + barPct + '%;background:' + (i===0?'var(--acc)':'var(--blu)') + ';border-radius:2px;"></div>'
+      +   '</div></div></div>'
+      + '</td>'
+      + '<td style="text-align:center;padding:8px 4px;">'
+      +   '<div style="font-weight:700;color:var(--txt);">' + r.pg + '</div>'
+      +   (r.pnd ? '<div style="font-size:10px;color:var(--gld);">+' + r.pnd + ' pend.</div>' : '')
+      + '</td>'
+      + '<td style="text-align:right;padding:8px 8px;font-weight:700;color:var(--gld);">' + fmt(r.bolsa) + '</td>'
+      + '<td style="text-align:right;padding:8px 8px;font-weight:800;color:var(--acc);">' + fmt(r.com) + '</td>'
+      + '<td style="text-align:center;padding:8px 4px;">'
+      +   (r.e.activo
+          ? '<span class="badge b-g b-sm">🟢</span>'
+          : '<span class="badge b-sm" style="background:#5C6E8A22;color:var(--sub);border:1px solid var(--brd);">⚫</span>')
+      + '</td>'
+      + '</tr>';
+  });
+
+  // Total row
+  h += '<tr style="border-top:2px solid var(--brd);background:var(--sur);">'
+    + '<td style="padding:10px 8px;font-weight:800;font-size:12px;">TOTAL</td>'
+    + '<td></td>'
+    + '<td style="text-align:right;padding:10px 8px;font-weight:800;color:var(--gld);">' + fmt(totalBolsa) + '</td>'
+    + '<td style="text-align:right;padding:10px 8px;font-weight:800;font-size:14px;color:var(--acc);">' + fmt(totalCom) + '</td>'
+    + '<td></td>'
+    + '</tr>';
+
+  h += '</tbody></table></div>';
+  list.innerHTML = h;
+}
+
+function checkBackupReminder() {
+  try {
+    var last = localStorage.getItem('lb_backup_last');
+    if(!last) {
+      // Never backed up
+      showBackupBanner('⚠️ Sin backup — descarga uno antes de tu primera quiniela con dinero real', '#FFD166');
+      return;
+    }
+    var dias = Math.floor((Date.now() - new Date(last).getTime()) / 86400000);
+    if(dias >= 7) {
+      showBackupBanner('⏰ Han pasado ' + dias + ' días sin backup — descarga uno ahora', '#FF3B5C');
+    }
+  } catch(e) {}
+}
+
+function showBackupBanner(msg, color) {
+  var existing = document.getElementById('backup-banner');
+  if(existing) existing.remove();
+  var banner = document.createElement('div');
+  banner.id = 'backup-banner';
+  banner.style.cssText = 'background:'+color+'18;border-bottom:2px solid '+color+'66;'
+    +'padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;';
+  banner.innerHTML = '<span style="font-size:12px;font-weight:700;color:'+color+';flex:1;">'+msg+'</span>'
+    +'<button style="background:'+color+';color:#06080F;border:none;border-radius:8px;'
+    +'padding:6px 12px;font-weight:700;font-size:11px;flex-shrink:0;">📥 Backup ahora</button>';
+  banner.addEventListener('click', function() {
+    backupData();
+    banner.remove();
+  });
+  // Insert after top-nav
+  var nav = document.getElementById('main-nav');
+  if(nav && nav.nextSibling) {
+    nav.parentNode.insertBefore(banner, nav.nextSibling);
+  }
+}
+
+function renderMetaSemanal() {
+  var com    = globalStats().tc;
+  var meta   = Number((function(){ try{return localStorage.getItem('lb_meta');}catch(e){return null;} })() || 500);
+  var falta  = Math.max(0, meta - com);
+  var pct    = Math.min(100, Math.round(com / meta * 100));
+  var record = Number((function(){ try{return localStorage.getItem('lb_record');}catch(e){return 0;} })() || 0);
+  if(com > record) { record = com; try{ localStorage.setItem('lb_record', String(com)); }catch(e){} }
+  var col = pct >= 100 ? 'var(--acc)' : pct >= 60 ? 'var(--gld)' : 'var(--red)';
+
+  var existing = document.getElementById('meta-card');
+  if(existing) existing.remove();
+
+  var div = document.createElement('div');
+  div.id = 'meta-card';
+  div.className = 'card';
+  div.style.cssText = 'background:linear-gradient(135deg,var(--acc)10,var(--acc)04);border-color:var(--acc)66;margin-bottom:16px;';
+  div.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+    +'<div class="card-lbl" style="margin:0;">🎯 META SEMANAL</div>'
+    +'<div style="display:flex;align-items:center;gap:8px;">'
+    +'<span style="font-size:11px;color:var(--sub);">🏆 Récord: '+fmt(record)+'</span>'
+    +'<button id="btn-edit-meta" class="btn btn-o btn-sm" style="padding:2px 8px;font-size:10px;">✏️</button>'
+    +'</div></div>'
+    +'<div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:10px;">'
+    +'<div><div style="font-family:Syne,sans-serif;font-weight:900;font-size:32px;color:'+col+';">'+fmt(com)+'</div>'
+    +'<div style="font-size:10px;color:var(--sub);">de '+fmt(meta)+' meta</div></div>'
+    +'<div style="text-align:right;">'
+    +(falta > 0
+      ? '<div style="font-family:Syne,sans-serif;font-weight:900;font-size:24px;color:var(--gld);">'+fmt(falta)+'</div>'
+        +'<div style="font-size:10px;color:var(--sub);">faltan</div>'
+      : '<div style="font-family:Syne,sans-serif;font-weight:900;font-size:24px;color:var(--acc);">Meta!</div>'
+    )
+    +'</div></div>'
+    +'<div style="background:var(--brd);border-radius:8px;height:10px;overflow:hidden;margin-bottom:8px;">'
+    +'<div style="width:'+pct+'%;height:100%;background:'+col+';border-radius:8px;transition:width .5s;"></div>'
+    +'</div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--sub);">'
+    +'<span>Proy. mensual: '+fmt(com*4)+'</span>'
+    +'<span style="color:'+col+';font-weight:700;">'+pct+'% completado</span>'
+    +'</div>';
+
+  var statsGrid = document.querySelector('#v-home .stats');
+  if(statsGrid) statsGrid.parentNode.insertBefore(div, statsGrid.nextSibling);
+
+  document.getElementById('btn-edit-meta').addEventListener('click', function(){
+    var nueva = prompt('Meta semanal de comision (en pesos):', meta);
+    if(nueva && !isNaN(nueva) && Number(nueva) > 0) {
+      try{ localStorage.setItem('lb_meta', nueva); }catch(e){}
+      renderMetaSemanal();
+    }
+  });
+}
+
+function renderHome() {
+  checkBackupReminder();
+  var s=globalStats();
+  $('g-act').textContent=EVTS.filter(function(e){return e.activo;}).length;
+  $('g-jug').textContent=s.tj;
+  $('g-bol').textContent=fmt(s.tb);
+  $('g-com').textContent=fmt(s.tc);
+  $('hdr-com').textContent=fmt(s.tc);
+  renderDesglose();
+  renderChart();
+  renderActivos();
+  renderInactivos();
+}
+
+function renderChart() {
+  var wrap=$('chart-wrap'), lbls=$('chart-labels');
+  wrap.innerHTML=''; lbls.innerHTML='';
+  // Mostrar historial de semanas + semana actual
+  var semanas=histSemanas.slice(-7);
+  // Semana actual
+  var comAct=globalStats().tc;
+  semanas.push({lbl:'Esta sem',com:comAct});
+  if(!semanas.length){wrap.innerHTML='<div style="color:var(--sub);font-size:12px;padding:20px;">Sin datos aun — comienza vendiendo quinielas!</div>';return;}
+  var maxVal=Math.max.apply(null,semanas.map(function(s){return s.com;}),1);
+  semanas.forEach(function(s){
+    var pct=maxVal>0 ? Math.round((s.com/maxVal)*100) : 5;
+    var bar=document.createElement('div'); bar.className='chart-bar';
+    bar.style.height=Math.max(pct,5)+'%';
+    bar.style.opacity=s.lbl==='Esta sem'?'1':'0.55';
+    bar.innerHTML='<div class="chart-tip">'+fmt(s.com)+'</div>';
+    wrap.appendChild(bar);
+    var lbl=document.createElement('div');
+    lbl.style.cssText='font-size:9px;color:var(--sub);text-align:center;flex:1;';
+    lbl.textContent=s.lbl;
+    lbls.appendChild(lbl);
+  });
+}
+
+function renderActivos() {
+  var activos=EVTS.filter(function(e){return e.activo;});
+  $('sec-act').style.display=activos.length?'block':'none';
+  $('grid-act').innerHTML=activos.map(function(e){
+    var pg=pags(e.id).length, pnd=pends(e.id).length, d=dat(e.id);
+    return '<div class="ev-card" data-evid="'+e.id+'">'
+      +'<div class="ev-hd" style="background:linear-gradient(135deg,'+e.c+'cc,'+e.c+'44);">'
+      +'<span style="font-size:20px;">'+e.ic+'</span>'
+      +'<div><div class="ev-nm">'+e.n+'</div><div class="ev-sub">$'+e.costo+' · '+e.cierre+'</div></div>'
+      +(pnd?'<span class="badge b-y b-sm" style="position:absolute;top:8px;right:8px;">⚠️'+pnd+'</span>':'')
+      +'</div>'
+      +'<div class="ev-stats">'
+      +'<div class="ev-s"><div class="ev-sv">'+d.participantes.length+'</div><div class="ev-sl">Jugadores</div></div>'
+      +'<div class="ev-s"><div class="ev-sv">'+fmt(pg*e.costo)+'</div><div class="ev-sl">Bolsa</div></div>'
+      +'<div class="ev-s"><div class="ev-sv">'+fmt(pg*e.costo*COM)+'</div><div class="ev-sl">Comisión</div></div>'
+      +'</div>'
+      +'<div style="padding:0 14px 10px;display:flex;justify-content:flex-end;">'
+      +'<button class="btn btn-o btn-sm ev-toggle" data-evid="'+e.id+'">Desactivar</button>'
+      +'</div></div>';
+  }).join('');
+}
+
+function renderInactivos() {
+  var inact=EVTS.filter(function(e){return !e.activo;});
+  $('grid-inact').innerHTML=inact.map(function(e){
+    return '<div class="inact-c">'
+      +'<span style="font-size:16px;">'+e.ic+'</span>'
+      +'<div class="inact-nm">'+e.n+'</div>'
+      +'<div style="font-size:9px;color:var(--sub);">$'+e.costo+'</div>'
+      +'<button class="btn btn-a btn-sm ev-toggle" data-evid="'+e.id+'" style="flex-shrink:0;">▶</button>'
+      +'</div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DETALLE EVENTO
+// ═══════════════════════════════════════════════════════════════════════════════
+// ─── COUNTDOWN TIMERS storage ──────────────────────────────────────────────
+var _countdownIntervals = {};
+
+function parseCierreDate(cierre) {
+  if(!cierre || cierre==='Por confirmar') return null;
+  var meses = {Ene:0,Ene:0,Feb:1,Mar:2,Abr:3,May:4,Jun:5,Jul:6,Ago:7,Sep:8,Oct:9,Nov:10,Dic:11};
+  var m = cierre.match(/(\d{1,2})\s+(\w{3})\s+(\d{2}):(\d{2})/);
+  if(!m) return null;
+  var now = new Date();
+  var d = new Date(now.getFullYear(), meses[m[2]]||now.getMonth(), parseInt(m[1]), parseInt(m[3]), parseInt(m[4]));
+  if(d < now) d.setFullYear(d.getFullYear()+1);
+  return d;
+}
+
+function renderCierreCountdown(e) {
+  var existing = document.getElementById('cierre-countdown');
+  if(existing) existing.remove();
+  if(_countdownIntervals[e.id]) { clearInterval(_countdownIntervals[e.id]); delete _countdownIntervals[e.id]; }
+
+  var fechaCierre = parseCierreDate(e.cierre);
+  var pnd = pends(e.id);
+
+  var div = document.createElement('div');
+  div.id  = 'cierre-countdown';
+  div.className = 'card';
+  div.style.cssText = 'border-color:#FFD16644;background:#FFD16606;margin-bottom:12px;';
+  div.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">'
+    +'<div>'
+    +'<div class="card-lbl" style="margin:0 0 4px;">⏰ CIERRE DEL EVENTO</div>'
+    +'<div id="cnt-timer" style="font-family:Syne,sans-serif;font-weight:900;font-size:22px;color:var(--gld);">'
+    +(fechaCierre ? '—' : e.cierre)
+    +'</div>'
+    +'<div style="font-size:10px;color:var(--sub);">'+e.cierre+'</div>'
+    +'</div>'
+    +'<div style="text-align:center;background:var(--sur);border-radius:12px;padding:10px 16px;">'
+    +'<div style="font-family:Syne,sans-serif;font-weight:900;font-size:26px;color:var(--gld);">'+pnd.length+'</div>'
+    +'<div style="font-size:10px;color:var(--sub);">sin pagar</div>'
+    +'</div>'
+    +(pnd.length > 0
+      ? '<button id="btn-recordatorio" class="btn btn-g btn-sm" style="font-size:11px;">📱 Recordatorio masivo</button>'
+      : '<span class="badge b-g b-sm">✅ Todos pagaron</span>'
+    )
+    +'</div>';
+
+  // Insert before tabs
+  var tabs = document.getElementById('det-tabs');
+  if(tabs) tabs.parentNode.insertBefore(div, tabs);
+
+  // Start countdown
+  if(fechaCierre) {
+    function tick() {
+      var diff = fechaCierre - Date.now();
+      var timerEl = document.getElementById('cnt-timer');
+      if(!timerEl) { clearInterval(_countdownIntervals[e.id]); return; }
+      if(diff <= 0) {
+        timerEl.textContent = '🔒 CERRADO';
+        timerEl.style.color = 'var(--red)';
+        clearInterval(_countdownIntervals[e.id]);
+        return;
+      }
+      var h = Math.floor(diff/3600000);
+      var m = Math.floor((diff%3600000)/60000);
+      var s = Math.floor((diff%60000)/1000);
+      timerEl.textContent = (h > 0 ? h+'h ' : '') + m+'m ' + s+'s';
+      timerEl.style.color = diff < 3600000 ? 'var(--red)' : 'var(--gld)';
+    }
+    tick();
+    _countdownIntervals[e.id] = setInterval(tick, 1000);
+  }
+
+  // Recordatorio masivo
+  var btnRec = document.getElementById('btn-recordatorio');
+  if(btnRec) btnRec.addEventListener('click', function(){
+    var ev2 = getEv(curId);
+    var msg = '🔔 *RECORDATORIO — ' + ev2.n + '*\n\n'
+      + 'Tu lugar NO está confirmado hasta que envíes tu comprobante de pago.\n\n'
+      + 'Si ya pagaste, reenvía tu comprobante por favor 🙏\n\n'
+      + '⏰ Cierre: ' + ev2.cierre + '\n'
+      + '— La Bolsa 🎯';
+    window.open('https://wa.me/?text='+encodeURIComponent(msg), '_blank');
+  });
+}
+
+function openEv(id) {
+  curId=id;
+  var e=getEv(id), pg=pags(id).length, pnd=pends(id);
+  var bolsa=pg*e.costo, neta=bolsa*(1-COM), com=bolsa*COM;
+  $('d-ic').textContent=e.ic; $('d-nm').textContent=e.n;
+  $('d-com-badge').textContent=fmt(com)+' comision';
+  $('d-pend-badge').textContent='⚠️ '+pnd.length+' sin pago';
+  $('d-pend-badge').style.display=pnd.length?'inline-flex':'none';
+  $('d-bruta').textContent=fmt(bolsa); $('d-com').textContent=fmt(com);
+  $('d-neta').textContent=fmt(neta);   $('d-jug').textContent=dat(id).participantes.length;
+  showView('v-det');
+  renderCierreCountdown(e);
+  goDetTab('jugadores');
+}
+
+function goDetTab(t) {
+  var tabs=['jugadores','parcial','resultados','ganadores','mensajes'];
+  document.querySelectorAll('#det-tabs .tab').forEach(function(b,i){
+    b.classList.toggle('on',tabs[i]===t);
+  });
+  tabs.forEach(function(s){ $('t-'+s).className='tsec'+(s===t?' on':''); });
+  if(t==='jugadores') renderJugs();
+  if(t==='parcial')   renderParcial();
+  if(t==='resultados') renderRes();
+  if(t==='ganadores') renderGans();
+  if(t==='mensajes')  renderMsgs();
+}
+
+// ── Jugadores ────────────────────────────────────────────────────────────────
+function renderJugs() {
+  var e=getEv(curId), pnd=pends(curId), pg=pags(curId);
+  var h='';
+  // Search bar
+  h += '<div style="margin-bottom:12px;">'
+    + '<input class="inp" id="search-jugadores" placeholder="🔍 Buscar por nombre o código..." '
+    + 'style="background:var(--sur);" oninput="filterJugadores(this.value)"/>'
+    + '</div>';
+
+  if(pnd.length){
+    h+='<div class="card" style="border-color:#FFD16644;background:#FFD16608;margin-bottom:12px;">'
+      +'<div class="card-lbl">⚠️ PENDIENTES DE PAGO ('+pnd.length+')</div>';
+    pnd.forEach(function(p){
+      var pCodigo = p.codigo || '—';
+      h+='<div class="pend-row">'
+        +(p.foto?'<img src="'+p.foto+'" style="width:46px;height:46px;border-radius:8px;object-fit:cover;flex-shrink:0;cursor:pointer;" onclick="window.open(this.src)">':'')
+        +'<div style="flex:1;min-width:110px;">'
+        +'<div style="font-weight:700;font-size:13px;">'+p.nombre+'</div>'
+        +'<div style="font-size:10px;color:var(--acc);font-family:Space Mono,monospace;margin:2px 0;">'+pCodigo+'</div>'
+        +'<div style="font-size:10px;color:var(--sub);">'+(p.telefono||'–')+' · '
+        +Object.values(p.picks||{}).filter(Boolean).length+'/'+e.matchups.length+' picks · des: '+(p.desempate||'–')+'</div>'
+        +'</div>'
+        +'<button class="btn btn-a btn-sm pj-conf" data-pid="'+p.id+'">✓ Confirmar</button>'
+        +'<button class="btn btn-r btn-sm pj-del"  data-pid="'+p.id+'">✕</button>'
+        +'</div>';
+    });
+    h+='</div>';
+  }
+  h+='<div class="card"><div class="card-lbl">✅ CONFIRMADOS — '+pg.length+'</div>';
+  if(!pg.length) h+='<div style="text-align:center;color:var(--sub);padding:20px;">Sin confirmados aun</div>';
+  pg.forEach(function(p,i){
+    h+='<div class="conf-row">'
+      +'<div class="num-circle">'+(i+1)+'</div>'
+      +'<div style="flex:1;">'
+      +'<div style="font-weight:700;font-size:13px;">'+p.nombre+'</div>'
+      +'<div style="font-size:10px;color:var(--sub);">'+(p.telefono||'–')+' · Des: '+(p.desempate||'–')+'</div>'
+      +'</div>'
+      +'<span class="badge b-g b-sm">✓ Pago</span>'
+      +'<button class="btn btn-r btn-sm pj-del" data-pid="'+p.id+'">✕</button>'
+      +'</div>';
+  });
+  h+='</div>';
+  $('t-jugadores').innerHTML=h;
+}
+
+// ── Parcial En Vivo ───────────────────────────────────────────────────────────
+function renderParcial() {
+  var e=getEv(curId), d=dat(curId), pg=pags(curId);
+  if(!pg.length){
+    $('t-parcial').innerHTML='<div class="card" style="text-align:center;padding:32px;"><div style="font-size:36px;margin-bottom:10px;">👥</div><div style="color:var(--sub);font-size:13px;">No hay jugadores confirmados aun</div></div>';
+    return;
+  }
+  var resCount=e.matchups.filter(function(m){return d.resultados[m.id]&&d.resultados[m.id].resultado;}).length;
+  var scored=pg.map(function(p){
+    var ac=e.matchups.reduce(function(a,m){
+      var r=d.resultados[m.id];
+      return (r&&r.resultado&&p.picks&&p.picks[m.id]&&r.resultado===p.picks[m.id])?a+1:a;
+    },0);
+    return Object.assign({},p,{ac:ac});
+  }).sort(function(a,b){return b.ac-a.ac;});
+
+  var h='<div class="card" style="border-color:#00E67644;background:#00E67606;margin-bottom:12px;">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;">'
+    +'<div style="font-size:11px;color:var(--acc);font-weight:700;">📊 CLASIFICACIÓN EN VIVO</div>'
+    +'<span class="badge b-g b-sm">'+resCount+'/'+e.matchups.length+' resultados</span>'
+    +'</div>'
+    +'<div style="font-size:11px;color:var(--sub);margin-top:4px;">Se actualiza al capturar resultados</div>'
+    +'</div>';
+  h+='<div class="card" style="padding:0;overflow:hidden;">';
+  scored.forEach(function(p,i){
+    var pct=resCount>0?Math.round(p.ac/resCount*100):0;
+    var medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.';
+    var col=i===0?'#FFD166':i===1?'#94A3B8':i===2?'#CD7C3A':'var(--acc)';
+    h+='<div style="padding:12px 16px;border-bottom:1px solid var(--brd);">'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;">'
+      +'<span style="font-size:'+(i<3?'18':'13')+'px;width:22px;text-align:center;">'+medal+'</span>'
+      +'<span style="flex:1;font-weight:700;font-size:13px;">'+p.nombre+'</span>'
+      +'<span style="font-weight:700;font-size:14px;color:'+col+';">'+p.ac+'/'+resCount+'</span>'
+      +'</div>'
+      +'<div class="parc-bar-bg"><div class="parc-bar" style="width:'+pct+'%;background:'+col+';"></div></div>'
+      +'</div>';
+  });
+  h+='</div>';
+  $('t-parcial').innerHTML=h;
+}
+
+// ── Resultados ────────────────────────────────────────────────────────────────
+function renderRes() {
+  var e=getEv(curId), d=dat(curId);
+  var h='';
+
+  // Mundial — capturar ganadores de cada lugar
+  if(e.tipo==='mundial') {
+    h+='<div class="card" style="border-color:#B8860B44;background:#B8860B06;margin-bottom:12px;">'
+      +'<div class="card-lbl">🌍 CAPTURA EL PODIO FINAL</div>';
+    (e.lugares||[]).forEach(function(l){
+      var res=d.resultados&&d.resultados[l.id]||'';
+      h+='<div class="fld"><label>'+l.lbl.toUpperCase()+'</label>'
+        +'<select class="inp mundial-res-sel" data-lid="'+l.id+'">'
+        +'<option value="">— Elige la seleccion —</option>';
+      (e.opciones||[]).forEach(function(o){
+        h+='<option value="'+o.n+'"'+(res===o.n?' selected':'')+'>'+o.flag+' '+o.n+'</option>';
+      });
+      h+='</select></div>';
+    });
+    h+='</div>';
+    // Desempate
+    h+='<div class="card" style="border-color:#00E67655;background:#00E67608;">'
+      +'<div style="font-size:11px;color:var(--acc);font-weight:700;margin-bottom:8px;">⚡ DESEMPATE REAL — '+e.desLbl+'</div>'
+      +'<input class="inp" id="des-real-inp" type="number" min="0" value="'+(d.desReal!=null?d.desReal:'')+'" placeholder="Total goles en el Mundial" style="width:160px;text-align:center;font-size:18px;font-weight:700;color:var(--acc);"/>'
+      +'</div>';
+    $('t-resultados').innerHTML=h;
+    return;
+  }
+
+  // UFC — capturar ganador + método por pelea
+  if(e.tipo==='ufc') {
+    e.matchups.forEach(function(m){
+      var res=(d.resultados&&d.resultados[m.id])||{};
+      var done=res.win&&res.met;
+      h+='<div class="m-row'+(done?' done':'')+'">'
+        +(m.estelar?'<span class="badge b-y b-sm" style="margin-bottom:8px;display:inline-flex;">⭐ Pelea Estelar</span>':'')
+        +'<div style="font-weight:700;font-size:13px;margin-bottom:8px;">'+m.L+' <span style="color:var(--sub);font-weight:400;">vs</span> '+m.V+'</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+        +'<div><div style="font-size:9px;color:var(--sub);margin-bottom:4px;">GANADOR</div>'
+        +'<div style="display:flex;gap:5px;">'
+        +'<button class="btn-res ufc-res-btn '+(res.win===m.L?'on':'')+'" data-mid="'+m.id+'" data-campo="win" data-val="'+m.L+'">'+m.L+'</button>'
+        +'<button class="btn-res ufc-res-btn '+(res.win===m.V?'on':'')+'" data-mid="'+m.id+'" data-campo="win" data-val="'+m.V+'">'+m.V+'</button>'
+        +'</div></div>'
+        +'<div><div style="font-size:9px;color:var(--sub);margin-bottom:4px;">MÉTODO</div>'
+        +'<div style="display:flex;gap:4px;flex-wrap:wrap;">';
+      (e.desOpts||['KO/TKO','Decision','Sumision','Sin concluir']).forEach(function(met){
+        h+='<button class="btn-res ufc-res-btn '+(res.met===met?'on':'')+'" data-mid="'+m.id+'" data-campo="met" data-val="'+met+'" style="font-size:10px;padding:5px 7px;">'+met+'</button>';
+      });
+      h+='</div></div></div>'+(done?'<span class="badge b-g b-sm" style="margin-top:6px;display:inline-flex;">✓</span>':'')+'</div>';
+    });
+    h+='<div class="card" style="border-color:#00E67655;background:#00E67608;">'
+      +'<div style="font-size:11px;color:var(--acc);font-weight:700;margin-bottom:4px;">⚡ PUNTAJE</div>'
+      +'<div style="font-size:11px;color:var(--sub);">+1 por acertar el ganador · +1 por acertar el método</div>'
+      +'</div>';
+    $('t-resultados').innerHTML=h;
+    return;
+  }
+
+  e.matchups.forEach(function(m){
+    var r=(d.resultados[m.id])||{};
+    h+='<div class="m-row'+(r.resultado?' done':'')+'">'
+      +(m.estelar?'<span class="badge b-y b-sm" style="margin-bottom:8px;display:inline-flex;">'+(getEv(curId).empate===false && (curId.indexOf('ufc')>=0||curId.indexOf('velada')>=0||curId.indexOf('supernova')>=0||curId.indexOf('ring')>=0)?'⭐ Pelea Estelar':'⭐ Partido Estelar')+'</span>':'')
+      +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:'+(e.empate?'8':'0')+'px;">'
+      +'<span style="font-weight:700;flex:1;">'+m.L+'</span>';
+    (e.empate?['L','E','V']:['L','V']).forEach(function(o){
+      var lbl=o==='L'?m.L:o==='E'?'Empate':m.V;
+      h+='<button class="btn-res'+(r.resultado===o?' on':'')+' res-btn" data-mid="'+m.id+'" data-opt="'+o+'">'+lbl+'</button>';
+    });
+    h+='<span style="font-weight:700;">'+m.V+'</span>'
+      +(r.resultado?'<span class="badge b-g b-sm">✓</span>':'')
+      +'</div>';
+    if(e.empate){
+      h+='<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sub);">'
+        +'<span>Marcador:</span>'
+        +'<input class="inp inp-sm marcador-inp" type="number" min="0" value="'+(r.golesL!=null?r.golesL:'')+'" placeholder="0" data-mid="'+m.id+'" data-campo="golesL"/>'
+        +'<span>–</span>'
+        +'<input class="inp inp-sm marcador-inp" type="number" min="0" value="'+(r.golesV!=null?r.golesV:'')+'" placeholder="0" data-mid="'+m.id+'" data-campo="golesV"/>'
+        +'</div>';
+    }
+    h+='</div>';
+  });
+  // Desempate real
+  var d2=dat(curId);
+  h+='<div class="card" style="border-color:#00E67655;background:#00E67608;">'
+    +'<div style="font-size:11px;color:var(--acc);font-weight:700;margin-bottom:8px;">⚡ DESEMPATE REAL — '+getEv(curId).desLbl+'</div>';
+  if(getEv(curId).desTipo==='numero'){
+    h+='<input class="inp" id="des-real-inp" type="number" min="0" value="'+(d2.desReal!=null?d2.desReal:'')+'" placeholder="Total" style="width:130px;text-align:center;font-size:20px;font-weight:700;color:var(--acc);"/>';
+  } else {
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    (getEv(curId).desOpts||[]).forEach(function(o){
+      h+='<button class="des-real-opt" data-opt="'+o+'" style="background:'+(d2.desReal===o?'var(--acc)':'var(--sur)')+';color:'+(d2.desReal===o?'var(--bg)':'var(--sub)')+';border:1.5px solid '+(d2.desReal===o?'var(--acc)':'var(--brd)')+';border-radius:10px;padding:11px;font-weight:700;font-size:12px;">'+o+'</button>';
+    });
+    h+='</div>';
+  }
+  h+='</div>';
+  $('t-resultados').innerHTML=h;
+}
+
+// ── Ganadores ─────────────────────────────────────────────────────────────────
+function renderGans() {
+  var e=getEv(curId), d=dat(curId);
+  var hayRes=e.matchups.some(function(m){return d.resultados[m.id]&&d.resultados[m.id].resultado;});
+  if(!hayRes){
+    $('t-ganadores').innerHTML='<div class="card" style="text-align:center;padding:36px;border-color:#00E67633;background:#00E67606;">'
+      +'<div style="font-size:30px;margin-bottom:10px;">⏳</div>'
+      +'<div style="font-family:Syne,sans-serif;font-weight:800;font-size:17px;color:var(--acc);">Captura los resultados primero</div></div>';
+    return;
+  }
+  var gans=calcGans(curId);
+  var h='';
+  [['🥇','#FFD166',1],['🥈','#94A3B8',2],['🥉','#CD7C3A',3]].forEach(function(row){
+    var medal=row[0],col=row[1],pos=row[2];
+    var g=gans.filter(function(x){return x.pos===pos;});
+    h+='<div class="g-card" style="border-color:'+(g.length?col+'44':'var(--brd)')+';background:'+(g.length?col+'08':'transparent')+';margin-bottom:10px;">'
+      +'<span style="font-size:28px;">'+medal+'</span>';
+    if(g.length){
+      g.forEach(function(x){
+        h+='<div style="flex:1;"><div style="font-weight:800;font-size:15px;color:'+col+';">'+x.nombre+'</div>'
+          +'<div style="font-size:11px;color:var(--sub);">'+x.ac+' aciertos · des: '+(x.desempate||'–')+'</div></div>';
+      });
+      h+='<div style="font-weight:800;font-size:22px;color:'+col+';">'+fmt(g[0].premio)+'</div>';
+      if(g.length>1) h+='<span class="badge b-sm" style="background:#A259FF22;color:#A259FF;border:1px solid #A259FF44;">÷</span>';
+    } else {
+      h+='<div style="flex:1;color:var(--sub);">–</div>';
+    }
+    h+='</div>';
+  });
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">'
+    +'<button class="btn btn-o" id="btn-archivar">📚 Archivar en Historial</button>'
+    +'<button class="btn btn-b" id="btn-reporte">📄 Generar Reporte</button>'
+    +'</div>';
+  $('t-ganadores').innerHTML=h;
+}
+
+// ── Mensajes ──────────────────────────────────────────────────────────────────
+function renderMsgs() {
+  var e=getEv(curId), gans=calcGans(curId), pg=pags(curId);
+  var neta=pg.length*e.costo*(1-COM);
+  var g1=gans.filter(function(g){return g.pos===1;}),
+      g2=gans.filter(function(g){return g.pos===2;}),
+      g3=gans.filter(function(g){return g.pos===3;});
+
+  var vars = {
+    evento:    e.n, costo: e.costo, cierre: e.cierre, desempate: e.desLbl,
+    bolsa:     Math.round(neta).toLocaleString(),
+    g1: g1.map(function(x){return x.nombre;}).join('/'),
+    g2: g2.map(function(x){return x.nombre;}).join('/'),
+    g3: g3.map(function(x){return x.nombre;}).join('/'),
+    p1: g1[0] ? Math.round(g1[0].premio).toLocaleString() : '0',
+    p2: g2[0] ? Math.round(g2[0].premio).toLocaleString() : '0',
+    p3: g3[0] ? Math.round(g3[0].premio).toLocaleString() : '0'
+  };
+  var msgA = applyTPL(loadTPL('anuncio'),    vars);
+  var msgR = applyTPL(loadTPL('resultados'), vars);
+
+  function msgCard(lbl, msg, waNum) {
+    var enc=encodeURIComponent(msg);
+    var waHref=waNum?"https://wa.me/"+WA_NUM+"?text="+enc:"";
+    return '<div class="card">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0;">'
+      +'<div class="card-lbl" style="margin:0;">'+lbl+'</div>'
+      +'<div style="display:flex;gap:6px;">'
+      +'<button class="btn btn-o btn-sm msg-copy" data-enc="'+enc+'">Copiar</button>'
+      +(waHref?'<a href="'+waHref+'" target="_blank" class="btn btn-g btn-sm" style="text-decoration:none;">WhatsApp</a>':'')
+      +'</div></div>'
+      +'<div class="msg-pre">'+msg+'</div>'
+      +'</div>';
+  }
+
+  var h=msgCard('📣 ANUNCIO QUINIELA',msgA,true)+msgCard('📱 RESULTADOS GRUPO',msgR,true);
+  gans.filter(function(g){return g.premio>0;}).forEach(function(g){
+    var msg="Hola "+g.nombre+"! 👋\n🏆 Ganaste en La Bolsa!\n"+e.n
+      +"\n\nPremio: *"+fmt(g.premio)+"*\nAciertos: "+g.ac+"/"+e.matchups.length
+      +"\n\nMandame tu CLABE + banco + titular ✅\n— La Bolsa 🎯";
+    h+=msgCard('💬 PRIVADO → '+g.nombre.toUpperCase(),msg,false);
+  });
+  $('t-mensajes').innerHTML=h;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DATOS DE PAGO
+// ═══════════════════════════════════════════════════════════════════════════════
+function renderPagoView() {
+  var h='';
+  Object.keys(PAGO_DEF).forEach(function(k){
+    var m=PAGO[k]||PAGO_DEF[k];
+    h+='<div class="card" style="margin-bottom:10px;border-color:'+(m.on?m.col+'44':'var(--brd)')+';background:'+(m.on?m.col+'06':'transparent')+'">'
+      +'<div class="pago-hdr" data-key="'+k+'" style="display:flex;align-items:center;gap:10px;cursor:pointer;">'
+      +'<span style="font-size:20px;">'+m.ic+'</span>'
+      +'<span style="flex:1;font-weight:700;font-size:13px;color:'+(m.on?m.col:'var(--sub)')+';">'+m.n+'</span>'
+      +'<div class="toggle" style="background:'+(m.on?m.col:'var(--brd)')+';justify-content:'+(m.on?'flex-end':'flex-start')+';"><div class="toggle-dot"></div></div>'
+      +'</div>'
+      +'<div style="margin-top:12px;display:'+(m.on?'block':'none')+'" id="pb-'+k+'">';
+    (PAGO_DEF[k].flds||[]).forEach(function(f){
+      h+='<div class="fld"><label>'+f.ph.toUpperCase()+'</label>'
+        +'<input class="inp pago-inp" data-key="'+k+'" data-campo="'+f.k+'" placeholder="'+f.ph+'" value="'+(m.v&&m.v[f.k]?m.v[f.k]:'')+'" /></div>';
+    });
+    h+='</div></div>';
+  });
+  $('pago-list').innerHTML=h;
+}
+
+function savePago() {
+  document.querySelectorAll('.pago-inp').forEach(function(inp){
+    var k=inp.dataset.key, campo=inp.dataset.campo;
+    if(!PAGO[k]) PAGO[k]=JSON.parse(JSON.stringify(PAGO_DEF[k]));
+    if(!PAGO[k].v) PAGO[k].v={};
+    PAGO[k].v[campo]=inp.value;
+  });
+  try{ localStorage.setItem('lb_pago',JSON.stringify(PAGO)); }catch(e){}
+  var btn=$('btn-save-pago'); btn.textContent='✅ Guardado';
+  setTimeout(function(){ btn.textContent='💾 Guardar datos de pago'; },2000);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// EDITOR
+// ═══════════════════════════════════════════════════════════════════════════════
+function renderEditorSel() {
+  var sel=$('edit-sel'); sel.innerHTML='<option value="">— Elige un evento —</option>';
+  EVTS.forEach(function(e){
+    var opt=document.createElement('option'); opt.value=e.id; opt.textContent=e.ic+' '+e.n;
+    sel.appendChild(opt);
+  });
+}
+
+function loadEditorForm(id) {
+  var e=getEv(id); if(!e) return;
+  $('ed-n').value=e.n; $('ed-costo').value=e.costo;
+  $('ed-activo').value=e.activo?'1':'0';
+  $('ed-cierre').value=e.cierre; $('ed-desc').value=e.desc||'';
+  $('ed-des-lbl').value=e.desLbl;
+  renderEdMatchups(e); $('editor-form').style.display='block'; $('edit-ok').style.display='none';
+}
+
+function teamPickerHTML(val, fieldClass, placeholder) {
+  var t = getTeam(val);
+  var imgSrc = t ? t.img : '';
+  var dispName = t ? t.n : val;
+  var imgHtml = imgSrc
+    ? '<img src="'+imgSrc+'" style="width:24px;height:24px;border-radius:50%;object-fit:contain;flex-shrink:0;">'
+    : '<div style="width:24px;height:24px;border-radius:50%;background:var(--brd);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--sub);">?</div>';
+  return '<div class="team-picker-wrap" style="position:relative;display:flex;align-items:center;gap:6px;flex:1;">'
+    + '<div class="tpimg" style="flex-shrink:0;">'+imgHtml+'</div>'
+    + '<input class="inp '+fieldClass+' tpinp" placeholder="'+placeholder+'" value="'+dispName+'" autocomplete="off" style="flex:1;min-width:0;" data-key="'+val+'">'
+    + '<div class="tpdrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--brd);border-radius:10px;max-height:190px;overflow-y:auto;z-index:500;box-shadow:0 8px 24px rgba(0,0,0,.5);margin-top:4px;"></div>'
+    + '</div>';
+}
+
+function attachPicker(input) {
+  var wrap  = input.closest('.team-picker-wrap');
+  var drop  = wrap.querySelector('.tpdrop');
+  var imgWr = wrap.querySelector('.tpimg');
+
+  function renderDrop(q) {
+    q = (q||'').toLowerCase().trim();
+    var keys = Object.keys(TEAMS).filter(function(k){
+      return !q || k.toLowerCase().indexOf(q)>=0 || TEAMS[k].n.toLowerCase().indexOf(q)>=0;
+    }).slice(0,16);
+    if(!keys.length){ drop.style.display='none'; return; }
+
+    // Group by liga
+    var groups = {}, order = [];
+    keys.forEach(function(k){
+      var lg = TEAMS[k].liga;
+      if(!groups[lg]){ groups[lg]=[]; order.push(lg); }
+      groups[lg].push(k);
+    });
+    var html = '';
+    order.forEach(function(lg){
+      html += '<div style="padding:5px 10px 2px;font-size:9px;color:var(--sub);letter-spacing:1px;">' + lg + '</div>';
+      groups[lg].forEach(function(k){
+        var t = TEAMS[k];
+        html += '<div class="tpopt" data-key="'+k+'" style="display:flex;align-items:center;gap:8px;padding:7px 10px;cursor:pointer;">'
+          + '<img src="'+t.img+'" class="tp-flag-img" style="width:22px;height:22px;border-radius:50%;object-fit:contain;">'
+          + '<span style="font-size:12px;font-weight:700;">'+t.n+'</span>'
+          + '</div>';
+      });
+    });
+    drop.innerHTML = html;
+    drop.style.display = 'block';
+
+    drop.querySelectorAll('.tpopt').forEach(function(opt){
+      opt.addEventListener('mousedown', function(ev){
+        ev.preventDefault();
+        var k = this.dataset.key, t = TEAMS[k];
+        input.value = t.n; input.dataset.key = k;
+        imgWr.innerHTML = '<img src="'+t.img+'" style="width:24px;height:24px;border-radius:50%;object-fit:contain;flex-shrink:0;">';
+        drop.style.display = 'none';
+      });
+      opt.addEventListener('mouseover', function(){ this.style.background='var(--sur)'; });
+      opt.addEventListener('mouseout',  function(){ this.style.background=''; });
+    });
+  }
+
+  input.addEventListener('input',  function(){ renderDrop(this.value); });
+  input.addEventListener('focus',  function(){ renderDrop(this.value); });
+  input.addEventListener('blur',   function(){ setTimeout(function(){ drop.style.display='none'; },200); });
+}
+
+function renderEdMatchups(e) {
+  $('ed-matchups').innerHTML = e.matchups.map(function(m,i){
+    return '<div class="ed-m" data-idx="'+i+'" style="background:var(--sur);border-radius:10px;padding:9px 12px;margin-bottom:8px;display:flex;gap:8px;align-items:center;">'
+      + (m.estelar ? '<span style="font-size:15px;">⭐</span>' : '<span style="font-size:12px;color:var(--sub);">'+(i+1)+'.</span>')
+      + teamPickerHTML(m.L, 'ed-l', 'Local')
+      + '<span style="color:var(--sub);font-size:11px;flex-shrink:0;">vs</span>'
+      + teamPickerHTML(m.V, 'ed-v', 'Visitante')
+      + '<button class="btn btn-r btn-sm ed-rm" data-idx="'+i+'" style="flex-shrink:0;">✕</button>'
+      + '</div>';
+  }).join('');
+  $('ed-matchups').querySelectorAll('.tpinp').forEach(function(inp){ attachPicker(inp); });
+}
+
+function saveEditor() {
+  var id=$('edit-sel').value, e=getEv(id); if(!e) return;
+  e.n=$('ed-n').value||e.n; e.costo=Number($('ed-costo').value)||e.costo;
+  e.activo=$('ed-activo').value==='1'; e.cierre=$('ed-cierre').value||e.cierre;
+  e.desc=$('ed-desc').value||e.desc; e.desLbl=$('ed-des-lbl').value||e.desLbl;
+  var rows=document.querySelectorAll('.ed-m'), newM=[];
+  rows.forEach(function(row,i){
+    var lInp=row.querySelector('.ed-l'), vInp=row.querySelector('.ed-v');
+    if(!lInp||!vInp) return;
+    var Lkey = lInp.dataset.key || lInp.value.trim();
+    var Vkey = vInp.dataset.key || vInp.value.trim();
+    var Lname = lInp.value.trim(), Vname = vInp.value.trim();
+    // Try to match display name back to key
+    var tL = getTeam(Lkey)||getTeam(Lname);
+    var tV = getTeam(Vkey)||getTeam(Vname);
+    var L  = tL ? Object.keys(TEAMS).find(function(k){return TEAMS[k]===tL;})||Lkey : Lkey;
+    var V  = tV ? Object.keys(TEAMS).find(function(k){return TEAMS[k]===tV;})||Vkey : Vkey;
+    if(L&&V) newM.push({id:i+1, L:L, V:V});
+  });
+  if(newM.length) e.matchups=newM;
+  $('edit-ok').style.display='block';
+  setTimeout(function(){ $('edit-ok').style.display='none'; },2500);
+  renderHome();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COMPARTIR
+// ═══════════════════════════════════════════════════════════════════════════════
+function renderCompartirSel() {
+  var sel=$('comp-sel'); sel.innerHTML='';
+  EVTS.forEach(function(e){
+    var opt=document.createElement('option'); opt.value=e.id; opt.textContent=e.ic+' '+e.n;
+    sel.appendChild(opt);
+  });
+  if(sel.options.length) updateWACard(sel.value);
+}
+
+function updateWACard(id) {
+  var e=getEv(id); if(!e) return;
+  var pg=pags(id).length, neta=pg*e.costo*(1-COM);
+  $('wc-ic').textContent=e.ic; $('wc-nm').textContent=e.n;
+  $('wc-desc').textContent=e.desc+' · Cierre: '+e.cierre;
+  $('wc-bol').textContent=fmt(pg*e.costo); $('wc-jug').textContent=pg;
+  $('wc-cost').textContent=e.costo; $('wc-btn-costo').textContent=e.costo;
+  $('wc-p1').textContent=fmt(neta*.7); $('wc-p2').textContent=fmt(neta*.2); $('wc-p3').textContent=fmt(neta*.1);
+  $('wc-cierre').textContent='⏰ Cierre: '+e.cierre+' · 🎯 Desempate: '+e.desLbl;
+  var msg="🎰 *¡QUINIELA "+e.n.toUpperCase()+"!*\n\n"
+    +"💰 *Bolsa acumulada: "+fmt(pg*e.costo)+"*\n👥 Participantes: "+pg
+    +"\n💵 Entrada: $"+e.costo+"\n\n🏆 *PREMIOS:*\n"
+    +"🥇 1er lugar: "+fmt(neta*.7)+"\n🥈 2do lugar: "+fmt(neta*.2)+"\n🥉 3er lugar: "+fmt(neta*.1)
+    +"\n\n⏰ Cierre: "+e.cierre+"\n🎯 Desempate: "+e.desLbl+"\n\n¿Le entras? 👀🔥 — La Bolsa";
+  var enc=encodeURIComponent(msg);
+  $('btn-copy-wa').onclick=function(){ cpText(this,msg); };
+  $('btn-wa-open').onclick=function(){ window.open("https://wa.me/"+WA_NUM+"?text="+enc,'_blank'); };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// HISTORIAL
+// ═══════════════════════════════════════════════════════════════════════════════
+function getHist(){ try{return JSON.parse(localStorage.getItem('lb_historial')||'[]');}catch(e){return [];} }
+function saveHist(arr){ try{localStorage.setItem('lb_historial',JSON.stringify(arr));}catch(e){} }
+
+// ─── CONFIGURACIÓN ───────────────────────────────────────────────────────────
+function renderConfig() {
+  // Número WA
+  var waInp = $('cfg-wa');
+  if(waInp) {
+    try { waInp.value = localStorage.getItem('lb_wa_num') || WA_NUM; } catch(e) {}
+  }
+  // Plantillas
+  ['anuncio','resultados','privado'].forEach(function(k) {
+    var ta = $(('tpl-'+k));
+    if(ta) ta.value = loadTPL(k);
+  });
+
+  // Backup — mostrar fecha último backup
+  updateBackupLast();
+
+  // Marca
+  try {
+    var m = JSON.parse(localStorage.getItem('lb_marca')||'{}');
+    if($('marca-nombre'))  $('marca-nombre').value  = m.nombre  || 'La Bolsa';
+    if($('marca-eslogan')) $('marca-eslogan').value = m.eslogan || '¿Cuánto hay en la bolsa?';
+    if($('marca-color'))   $('marca-color').value   = m.color   || '#00E676';
+    if($('marca-color-hex')) $('marca-color-hex').value = m.color || '#00E676';
+    if($('marca-color2'))    $('marca-color2').value    = m.colorSecundario || '#00BFA5';
+    if($('marca-color2-hex')) $('marca-color2-hex').value = m.colorSecundario || '#00BFA5';
+    // Restaurar logo si existe
+    if(m.logoUrl) {
+      var nameEl = $('marca-logo-name');
+      var prevEl = $('marca-logo-preview');
+      var imgEl  = $('marca-logo-img');
+      var clearBtn = $('btn-clear-logo');
+      if(nameEl)   nameEl.textContent = 'Logo guardado ✓';
+      if(prevEl)   prevEl.style.display = 'block';
+      if(imgEl)    imgEl.src = m.logoUrl;
+      if(clearBtn) clearBtn.style.display = 'inline-flex';
+    }
+    updateMarcaPreview();
+  } catch(e) {}
+
+  // File upload handler
+  var fileInput = $('marca-logo-file');
+  var pickBtn   = $('btn-pick-logo');
+  var clearBtn2 = $('btn-clear-logo');
+
+  if(pickBtn) pickBtn.addEventListener('click', function() {
+    if(fileInput) fileInput.click();
+  });
+
+  if(fileInput) fileInput.addEventListener('change', function() {
+    var file = this.files[0];
+    if(!file) return;
+    if(file.size > 2 * 1024 * 1024) {
+      alert('La imagen es muy grande. Máximo 2MB.');
+      this.value = ''; return;
+    }
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      var dataUrl = ev.target.result;
+      // Guardar base64 temporalmente para preview
+      window._logoTemp = dataUrl;
+      var nameEl   = $('marca-logo-name');
+      var prevEl   = $('marca-logo-preview');
+      var imgEl    = $('marca-logo-img');
+      var clearBtn = $('btn-clear-logo');
+      if(nameEl)   nameEl.textContent = file.name;
+      if(prevEl)   prevEl.style.display = 'block';
+      if(imgEl)    imgEl.src = dataUrl;
+      if(clearBtn) clearBtn.style.display = 'inline-flex';
+      updateMarcaPreview();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  if(clearBtn2) clearBtn2.addEventListener('click', function() {
+    window._logoTemp = null;
+    if(fileInput) fileInput.value = '';
+    var nameEl = $('marca-logo-name');
+    var prevEl = $('marca-logo-preview');
+    var clrBtn = $('btn-clear-logo');
+    if(nameEl) nameEl.textContent = 'Sin imagen seleccionada';
+    if(prevEl) prevEl.style.display = 'none';
+    if(clrBtn) clrBtn.style.display = 'none';
+    // Quitar logo guardado
+    try {
+      var m2 = JSON.parse(localStorage.getItem('lb_marca')||'{}');
+      delete m2.logoUrl; localStorage.setItem('lb_marca', JSON.stringify(m2));
+    } catch(e) {}
+    updateMarcaPreview();
+  });
+
+  // Sync color picker <-> hex input
+  ['marca-color','marca-color2'].forEach(function(id) {
+    var picker = $(id), hex = $(id+'-hex');
+    if(!picker || !hex) return;
+    picker.addEventListener('input', function() { hex.value = this.value; updateMarcaPreview(); });
+    hex.addEventListener('input', function() {
+      if(/^#[0-9A-Fa-f]{6}$/.test(this.value)) { picker.value = this.value; updateMarcaPreview(); }
+    });
+  });
+  $('marca-nombre')  && $('marca-nombre').addEventListener('input',  updateMarcaPreview);
+  $('marca-eslogan') && $('marca-eslogan').addEventListener('input', updateMarcaPreview);
+}
+
+function updateMarcaPreview() {
+  var nombre  = ($('marca-nombre')  && $('marca-nombre').value)  || 'La Bolsa';
+  var eslogan = ($('marca-eslogan') && $('marca-eslogan').value) || '¿CUÁNTO HAY EN LA BOLSA?';
+  var color   = ($('marca-color')   && $('marca-color').value)   || '#00E676';
+  var logoUrl = ($('marca-logo')    && $('marca-logo').value)    || '';
+  if($('prev-nombre'))  $('prev-nombre').textContent  = nombre;
+  if($('prev-eslogan')) $('prev-eslogan').textContent = eslogan.toUpperCase();
+  if($('prev-nombre'))  $('prev-nombre').style.color  = color;
+  if($('prev-logo'))    $('prev-logo').style.background = color;
+  var logoSrc = window._logoTemp || logoUrl;
+  if(logoSrc && $('prev-logo')) {
+    var img=document.createElement('img');
+    img.src=logoSrc;
+    img.style.cssText='width:28px;height:28px;border-radius:6px;object-fit:contain;';
+    img.onerror=function(){this.style.display='none';};
+    $('prev-logo').innerHTML='';
+    $('prev-logo').appendChild(img);
+  } else if($('prev-logo')) {
+    $('prev-logo').textContent = '$';
+  }
+}
+
+function previewTPL(key) {
+  var ta = $('tpl-'+key); if(!ta) return;
+  var vars = {
+    evento:'Liga MX', costo:'100', cierre:'Sab 22 Mar 17:00',
+    desempate:'Total goles en la jornada', bolsa:'1,800',
+    g1:'Juan Perez', g2:'Maria Lopez', g3:'Carlos Ruiz',
+    p1:'1,260', p2:'360', p3:'180',
+    nombre:'Juan Perez', premio:'1,260'
+  };
+  var preview = applyTPL(ta.value, vars);
+  showModal(
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">'
+    +'<div style="font-size:13px;font-weight:700;color:var(--acc);">👁 Preview del mensaje</div>'
+    +'<button class="btn btn-r btn-sm" data-close>✕</button></div>'
+    +'<div style="font-size:11px;color:var(--sub);margin-bottom:10px;">Con datos de ejemplo (Liga MX)</div>'
+    +'<div style="background:var(--sur);border-radius:10px;padding:14px;font-family:Segoe UI,sans-serif;'
+    +'font-size:13px;color:var(--txt);white-space:pre-wrap;line-height:1.7;">'+preview+'</div>'
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// BACKUP / RESTORE / EXPORT
+// ═══════════════════════════════════════════════════════════════════════════════
+function backupData() {
+  var snapshot = {
+    version:  2,
+    fecha:    new Date().toISOString(),
+    datos:    datos,
+    pago:     PAGO,
+    historial:getHist(),
+    histSem:  histSemanas,
+    config: {
+      wa:    WA_NUM,
+      pin:   PIN_OK,
+      tema:  isDark ? 'dark' : 'light',
+      marca: (function(){ try{ return JSON.parse(localStorage.getItem('lb_marca')||'null'); }catch(e){return null;} })(),
+      tpls: {
+        anuncio:    (function(){ try{ return localStorage.getItem('lb_tpl_anuncio')||''; }catch(e){return '';} })(),
+        resultados: (function(){ try{ return localStorage.getItem('lb_tpl_resultados')||''; }catch(e){return '';} })(),
+        privado:    (function(){ try{ return localStorage.getItem('lb_tpl_privado')||''; }catch(e){return '';} })()
+      }
+    }
+  };
+
+  var json  = JSON.stringify(snapshot, null, 2);
+  var blob  = new Blob([json], {type:'application/json'});
+  var url   = URL.createObjectURL(blob);
+  var fecha = new Date().toLocaleDateString('es-MX').replace(/\//g,'-');
+  var a     = document.createElement('a');
+  a.href    = url;
+  a.download = 'LaBolsa-Backup-' + fecha + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  try { localStorage.setItem('lb_backup_last', new Date().toISOString()); } catch(e) {}
+  updateBackupStatus('✅ Backup descargado correctamente', '#00E676');
+  updateBackupLast();
+}
+
+function restoreData(file) {
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      var snap = JSON.parse(ev.target.result);
+      if(!snap.version || !snap.datos) {
+        updateBackupStatus('❌ Archivo inválido — no es un backup de La Bolsa', '#FF3B5C');
+        return;
+      }
+
+      if(!confirm('Restaurar datos desde backup? Los datos actuales seran reemplazados.')) return;
+
+      // Restore datos
+      datos = snap.datos;
+
+      // Restore config
+      if(snap.config) {
+        if(snap.config.wa)  { WA_NUM = snap.config.wa;  try{ localStorage.setItem('lb_wa_num', snap.config.wa); }catch(e){} }
+        if(snap.config.pin) { PIN_OK = snap.config.pin; try{ localStorage.setItem('lb_pin_code', snap.config.pin); sessionStorage.setItem('lb_pin', snap.config.pin); }catch(e){} }
+        if(snap.config.marca) { try{ localStorage.setItem('lb_marca', JSON.stringify(snap.config.marca)); }catch(e){} }
+        if(snap.config.tpls) {
+          try {
+            if(snap.config.tpls.anuncio)    localStorage.setItem('lb_tpl_anuncio', snap.config.tpls.anuncio);
+            if(snap.config.tpls.resultados) localStorage.setItem('lb_tpl_resultados', snap.config.tpls.resultados);
+            if(snap.config.tpls.privado)    localStorage.setItem('lb_tpl_privado', snap.config.tpls.privado);
+          } catch(e) {}
+        }
+      }
+
+      // Restore historial
+      if(snap.historial) saveHist(snap.historial);
+      if(snap.histSem)   { histSemanas = snap.histSem; try{ localStorage.setItem('lb_hist_sem', JSON.stringify(snap.histSem)); }catch(e){} }
+
+      // Restore pago
+      if(snap.pago) {
+        PAGO = snap.pago;
+        try { localStorage.setItem('lb_pago', JSON.stringify(snap.pago)); } catch(e) {}
+      }
+
+      try { localStorage.setItem('lb_backup_last', new Date().toISOString()); } catch(e) {}
+
+      updateBackupStatus('✅ Datos restaurados desde backup del ' + new Date(snap.fecha).toLocaleDateString('es-MX'), '#00E676');
+      renderHome();
+
+    } catch(err) {
+      updateBackupStatus('❌ Error al leer el archivo: ' + err.message, '#FF3B5C');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function updateBackupStatus(msg, color) {
+  var el = $('backup-status');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.cssText = 'display:block;background:'+color+'18;border:1px solid '+color+'44;border-radius:8px;padding:10px 14px;font-size:12px;color:'+color+';';
+  setTimeout(function(){ el.style.display='none'; }, 4000);
+}
+
+function updateBackupLast() {
+  var el = $('backup-last'); if(!el) return;
+  try {
+    var last = localStorage.getItem('lb_backup_last');
+    if(last) {
+      var d = new Date(last);
+      el.textContent = '🕐 Último backup: ' + d.toLocaleDateString('es-MX') + ' a las ' + d.toLocaleTimeString('es-MX', {hour:'2-digit',minute:'2-digit'});
+    } else {
+      el.textContent = '⚠️ Sin backup guardado — descarga uno ahora';
+      el.style.color = '#FFD166';
+    }
+  } catch(e) {}
+}
+
+// ─── EXPORT CSV ──────────────────────────────────────────────────────────────
+function exportJugadoresCSV() {
+  // Build headers dynamically with one col per matchup
+  // Use the event with most matchups for header generation
+  var allRows = [];
+
+  EVTS.forEach(function(e) {
+    var d  = dat(e.id);
+    var pg = d.participantes;
+    if(!pg.length) return;
+
+    // Header row for this event
+    var headers = ['Evento','Nombre','Telefono','Status','Pagado','Desempate','Aciertos'];
+    e.matchups.forEach(function(m,i) {
+      headers.push('Partido ' + (i+1) + ': ' + m.L + ' vs ' + m.V);
+    });
+    allRows.push(headers);
+
+    pg.forEach(function(p) {
+      var sc  = calcScore(p, e.id);
+      var row = [
+        e.n,
+        p.nombre    || '',
+        p.telefono  || '',
+        p.pagado ? 'Confirmado' : 'Pendiente',
+        p.pagado ? 'Si' : 'No',
+        p.desempate || '',
+        sc.ac       || '0'
+      ];
+      // Add picks
+      e.matchups.forEach(function(m) {
+        var pick = p.picks && p.picks[m.id];
+        if(!pick) { row.push('—'); return; }
+        // Normal pick
+        if(typeof pick === 'string') {
+          var lbl = pick==='L' ? (m.Lshow||m.L) : pick==='V' ? (m.Vshow||m.V) : pick==='E' ? 'Empate' : pick;
+          row.push(lbl);
+        }
+        // UFC pick (object with win + met)
+        else if(typeof pick === 'object') {
+          row.push((pick.win||'—') + ' / ' + (pick.met||'—'));
+        }
+        else { row.push(String(pick)); }
+      });
+      allRows.push(row);
+    });
+
+    // Empty separator row
+    allRows.push([]);
+  });
+
+  if(!allRows.length) { alert('No hay jugadores para exportar'); return; }
+  downloadCSV(allRows, 'LaBolsa-Jugadores');
+}
+
+function exportHistorialCSV() {
+  var hist = getHist();
+  if(!hist.length) { alert('No hay historial para exportar'); return; }
+  var rows = [['Fecha','Evento','Jugadores','Bolsa Bruta','Comision','Bolsa Neta','1er Lugar','Premio 1ro','2do Lugar','Premio 2do','3er Lugar','Premio 3ro']];
+  hist.forEach(function(h) {
+    var g1 = (h.ganadores||[]).find(function(g){return g.pos===1;})||{};
+    var g2 = (h.ganadores||[]).find(function(g){return g.pos===2;})||{};
+    var g3 = (h.ganadores||[]).find(function(g){return g.pos===3;})||{};
+    rows.push([
+      h.fecha, h.evento, h.jugadores,
+      h.bolsa||0, Math.round(h.com||0), Math.round(h.neta||0),
+      g1.nombre||'—', g1.premio||0,
+      g2.nombre||'—', g2.premio||0,
+      g3.nombre||'—', g3.premio||0
+    ]);
+  });
+  downloadCSV(rows, 'LaBolsa-Historial');
+}
+
+function downloadCSV(rows, filename) {
+  var lines = [];
+  for(var i=0; i<rows.length; i++) {
+    var cols = [];
+    for(var j=0; j<rows[i].length; j++) {
+      var cell = String(rows[i][j]);
+      cell = cell.replace(/"/g, '""');
+      if(cell.indexOf(',') >= 0 || cell.indexOf('"') >= 0) cell = '"' + cell + '"';
+      cols.push(cell);
+    }
+    lines.push(cols.join(','));
+  }
+  var csv  = lines.join('\r\n');
+  var bom  = '\uFEFF';
+  var blob = new Blob([bom + csv], {type:'text/csv;charset=utf-8;'});
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href   = url;
+  var today = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
+  a.download = filename + '-' + today + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ANALYTICS DASHBOARD
+// ═══════════════════════════════════════════════════════════════════════════════
+function renderAnalytics() {
+  var hist    = getHist();
+  var periodo = ($('an-periodo') && $('an-periodo').value) || 'all';
+
+  // Filter historial by period
+  var ahora = Date.now();
+  var filtrado = hist.filter(function(h) {
+    if(periodo === 'all') return true;
+    try {
+      var parts = h.fecha.split('/');
+      var d = new Date(parts[2], parts[1]-1, parts[0]);
+      var diff = ahora - d.getTime();
+      if(periodo === 'week')  return diff <= 7  * 86400000;
+      if(periodo === 'month') return diff <= 30 * 86400000;
+    } catch(e) { return true; }
+    return true;
+  });
+
+  // ── KPIs ─────────────────────────────────────────────────────────────────
+  var totalCom   = filtrado.reduce(function(a,h){ return a + (h.com||0); }, 0);
+  var totalBolsa = filtrado.reduce(function(a,h){ return a + (h.bolsa||0); }, 0);
+  var totalJugs  = filtrado.reduce(function(a,h){ return a + (h.jugadores||0); }, 0);
+  var totalQ     = filtrado.length;
+
+  // Add current active events
+  var comActiva = 0, jugsActivos = 0;
+  EVTS.forEach(function(e) {
+    var pg = pags(e.id).length;
+    comActiva += pg * e.costo * COM;
+    jugsActivos += dat(e.id).participantes.length;
+  });
+
+  var kpiEl = $('an-kpis');
+  if(kpiEl) kpiEl.innerHTML = [
+    ['💰', fmt(totalCom + comActiva), 'Comisión total', 'var(--acc)'],
+    ['🏆', totalQ + EVTS.filter(function(e){return e.activo;}).length, 'Quinielas', 'var(--blu)'],
+    ['👥', totalJugs + jugsActivos, 'Jugadores totales', 'var(--txt)'],
+    ['📈', fmt(totalBolsa), 'Bolsa movida', 'var(--gld)']
+  ].map(function(k) {
+    return '<div class="stat"><div style="font-size:20px;margin-bottom:4px;">'+k[0]+'</div>'
+      +'<div class="stat-v" style="color:'+k[3]+';font-size:18px;">'+k[1]+'</div>'
+      +'<div class="stat-l">'+k[2]+'</div></div>';
+  }).join('');
+
+  // ── CHART — Comisión por quiniela ────────────────────────────────────────
+  var chartData = [];
+  // Add historial
+  filtrado.slice(-8).forEach(function(h) {
+    chartData.push({ lbl: h.evento.length > 10 ? h.evento.slice(0,10)+'…' : h.evento, val: h.com||0, tipo:'hist' });
+  });
+  // Add activos
+  EVTS.filter(function(e){ return e.activo; }).forEach(function(e) {
+    var com = pags(e.id).length * e.costo * COM;
+    if(com > 0) chartData.push({ lbl: e.n.length > 10 ? e.n.slice(0,10)+'…' : e.n, val: com, tipo:'activo' });
+  });
+
+  var barsEl   = $('an-chart-bars');
+  var labelsEl = $('an-chart-labels');
+  if(barsEl && chartData.length) {
+    var maxVal = Math.max.apply(null, chartData.map(function(d){ return d.val; })) || 1;
+    barsEl.innerHTML = chartData.map(function(d,i) {
+      var pct   = Math.max(Math.round((d.val / maxVal) * 100), 4);
+      var color = d.tipo === 'activo' ? 'var(--acc)' : '#4A9EFF';
+      return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;">'
+        +'<div style="font-size:10px;font-weight:700;color:'+color+';">'+fmt(d.val)+'</div>'
+        +'<div style="width:100%;background:'+color+';border-radius:4px 4px 0 0;height:'+pct+'%;opacity:'+(d.tipo==='activo'?'1':'0.6')+';transition:height .4s;"></div>'
+        +'</div>';
+    }).join('');
+    if(labelsEl) labelsEl.innerHTML = chartData.map(function(d) {
+      return '<div style="flex:1;font-size:9px;color:var(--sub);text-align:center;line-height:1.3;">'+d.lbl+'</div>';
+    }).join('');
+  } else if(barsEl) {
+    barsEl.innerHTML = '<div style="color:var(--sub);font-size:12px;padding:20px;">Archiva quinielas para ver datos históricos</div>';
+  }
+
+  // ── TOP EVENTOS ──────────────────────────────────────────────────────────
+  var evStats = {};
+  EVTS.forEach(function(e) {
+    evStats[e.id] = evStats[e.id] || {n:e.n, ic:e.ic, jugs:0, com:0, q:0};
+    evStats[e.id].jugs += dat(e.id).participantes.length;
+    evStats[e.id].com  += pags(e.id).length * e.costo * COM;
+    evStats[e.id].q    += dat(e.id).participantes.length > 0 ? 1 : 0;
+  });
+  filtrado.forEach(function(h) {
+    var key = h.evento;
+    if(!evStats[key]) evStats[key] = {n:h.evento, ic:'📋', jugs:0, com:0, q:0};
+    evStats[key].jugs += h.jugadores||0;
+    evStats[key].com  += h.com||0;
+    evStats[key].q    += 1;
+  });
+
+  var evArr = Object.values(evStats).filter(function(e){ return e.jugs > 0; })
+    .sort(function(a,b){ return b.jugs - a.jugs; }).slice(0,6);
+
+  var topEvEl = $('an-top-eventos');
+  if(topEvEl) {
+    var maxJugs = evArr.length ? evArr[0].jugs : 1;
+    topEvEl.innerHTML = evArr.length
+      ? evArr.map(function(e,i) {
+        var pct = Math.round((e.jugs/maxJugs)*100);
+        var col = i===0?'var(--acc)':i===1?'var(--gld)':'var(--blu)';
+        return '<div style="margin-bottom:12px;">'
+          +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">'
+          +'<span style="font-size:12px;font-weight:700;">'+(e.ic||'📋')+' '+e.n+'</span>'
+          +'<div style="text-align:right;">'
+          +'<span style="font-size:12px;color:'+col+';font-weight:700;">'+e.jugs+' jugadores</span>'
+          +'<span style="font-size:11px;color:var(--sub);margin-left:8px;">'+fmt(e.com)+' comis.</span>'
+          +'</div></div>'
+          +'<div style="background:var(--brd);border-radius:4px;height:6px;">'
+          +'<div style="width:'+pct+'%;height:100%;background:'+col+';border-radius:4px;transition:width .5s;"></div>'
+          +'</div></div>';
+      }).join('')
+      : '<div style="color:var(--sub);font-size:12px;">Sin datos aún</div>';
+  }
+
+  // ── TOP JUGADORES ────────────────────────────────────────────────────────
+  var jugMap = {};
+  EVTS.forEach(function(e) {
+    dat(e.id).participantes.forEach(function(p) {
+      var k = p.nombre;
+      if(!jugMap[k]) jugMap[k] = {nombre:k, partidas:0, pagadas:0, gastado:0};
+      jugMap[k].partidas++;
+      if(p.pagado) { jugMap[k].pagadas++; jugMap[k].gastado += e.costo; }
+    });
+  });
+  filtrado.forEach(function(h) {
+    (h.ganadores||[]).forEach(function(g) {
+      if(!jugMap[g.nombre]) jugMap[g.nombre] = {nombre:g.nombre, partidas:0, pagadas:0, gastado:0, ganado:0};
+      jugMap[g.nombre].ganado = (jugMap[g.nombre].ganado||0) + (g.premio||0);
+    });
+  });
+
+  var topJugs = Object.values(jugMap).sort(function(a,b){ return b.pagadas - a.pagadas; }).slice(0,10);
+  var topJugsEl = $('an-top-jugs');
+  if(topJugsEl) {
+    topJugsEl.innerHTML = topJugs.length
+      ? '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">'
+        +'<thead><tr style="border-bottom:1px solid var(--brd);">'
+        +'<th style="text-align:left;padding:6px 8px;color:var(--sub);font-size:9px;">#</th>'
+        +'<th style="text-align:left;padding:6px 8px;color:var(--sub);font-size:9px;">NOMBRE</th>'
+        +'<th style="text-align:center;padding:6px 4px;color:var(--sub);font-size:9px;">PARTIDAS</th>'
+        +'<th style="text-align:right;padding:6px 8px;color:var(--sub);font-size:9px;">GASTADO</th>'
+        +'<th style="text-align:right;padding:6px 8px;color:var(--gld);font-size:9px;">GANADO</th>'
+        +'</tr></thead><tbody>'
+        + topJugs.map(function(j,i) {
+          var medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+          return '<tr style="border-bottom:1px solid var(--brd);">'
+            +'<td style="padding:8px;font-size:14px;">'+medal+'</td>'
+            +'<td style="padding:8px;font-weight:700;">'+j.nombre+'</td>'
+            +'<td style="padding:8px;text-align:center;color:var(--blu);">'+j.pagadas+'</td>'
+            +'<td style="padding:8px;text-align:right;color:var(--sub);">'+fmt(j.gastado)+'</td>'
+            +'<td style="padding:8px;text-align:right;font-weight:700;color:var(--gld);">'+fmt(j.ganado||0)+'</td>'
+            +'</tr>';
+        }).join('')
+        +'</tbody></table></div>'
+      : '<div style="color:var(--sub);font-size:12px;">Sin jugadores confirmados aún</div>';
+  }
+
+  // ── TASA DE CONVERSIÓN ───────────────────────────────────────────────────
+  var totEnviados  = 0, totPagados = 0;
+  EVTS.forEach(function(e) {
+    totEnviados += dat(e.id).participantes.length;
+    totPagados  += pags(e.id).length;
+  });
+  var tasa = totEnviados > 0 ? Math.round((totPagados/totEnviados)*100) : 0;
+  var convEl = $('an-conversion');
+  if(convEl) {
+    var col = tasa >= 80 ? 'var(--acc)' : tasa >= 50 ? 'var(--gld)' : 'var(--red)';
+    var msg = tasa >= 80 ? '🔥 Excelente' : tasa >= 50 ? '⚠️ Mejorable' : '❌ Baja — revisa tu flujo de cobro';
+    convEl.innerHTML = '<div style="display:flex;align-items:center;gap:16px;">'
+      +'<div style="text-align:center;min-width:80px;">'
+      +'<div style="font-family:Syne,sans-serif;font-weight:900;font-size:42px;color:'+col+';">'+tasa+'%</div>'
+      +'<div style="font-size:11px;color:var(--sub);">conversión</div>'
+      +'</div>'
+      +'<div>'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:6px;">'+msg+'</div>'
+      +'<div style="font-size:12px;color:var(--sub);line-height:1.8;">'
+      +totPagados+' pagaron de '+totEnviados+' que enviaron picks<br>'
+      +(totEnviados-totPagados)+' pendientes de confirmar pago'
+      +'</div></div></div>'
+      +'<div style="background:var(--brd);border-radius:6px;height:8px;margin-top:14px;">'
+      +'<div style="width:'+tasa+'%;height:100%;background:'+col+';border-radius:6px;transition:width .5s;"></div>'
+      +'</div>';
+  }
+
+  // ── PROYECCIÓN MENSUAL ───────────────────────────────────════════════════
+  var proEl = $('an-proyeccion');
+  if(proEl) {
+    // Basado en promedio de las últimas quinielas
+    var ultimasSems = Math.max(histSemanas.length, 1);
+    var comProm = histSemanas.length
+      ? histSemanas.reduce(function(a,s){ return a+(s.com||0); },0) / histSemanas.length
+      : comActiva;
+
+    var proMes   = Math.round(comProm * 4);   // 4 semanas
+    var proAnual = proMes * 12;
+
+    proEl.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">'
+      +[
+        ['Esta semana', fmt(comActiva), 'var(--acc)'],
+        ['Este mes (proj.)', fmt(proMes), 'var(--gld)'],
+        ['Anual (proj.)', fmt(proAnual), 'var(--prp)']
+      ].map(function(p) {
+        return '<div style="background:var(--sur);border-radius:12px;padding:12px;text-align:center;">'
+          +'<div style="font-weight:800;font-size:16px;color:'+p[2]+';">'+p[1]+'</div>'
+          +'<div style="font-size:10px;color:var(--sub);margin-top:3px;">'+p[0]+'</div>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+      +'<div style="font-size:10px;color:var(--sub);margin-top:10px;">* Proyección basada en promedio de quinielas activas/archivadas</div>';
+  }
+}
+
+// Filter jugadores search
+function filterJugadores(q) {
+  q = q.toLowerCase().trim();
+  document.querySelectorAll('.pend-row, .conf-row').forEach(function(row) {
+    var text = row.textContent.toLowerCase();
+    row.style.display = (!q || text.indexOf(q) >= 0) ? '' : 'none';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CONTABILIDAD
+// ═══════════════════════════════════════════════════════════════════════════════
+function renderContabilidad() {
+  var hist = getHist();
+  var ahora = new Date();
+
+  // Semana actual (lunes-domingo)
+  var diaSem = ahora.getDay() || 7;
+  var inicioSem = new Date(ahora); inicioSem.setDate(ahora.getDate() - diaSem + 1); inicioSem.setHours(0,0,0,0);
+  var inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+  var inicioAnio = new Date(ahora.getFullYear(), 0, 1);
+
+  function enRango(fechaStr, desde) {
+    try {
+      var p = fechaStr.split('/');
+      var d = new Date(p[2], p[1]-1, p[0]);
+      return d >= desde;
+    } catch(e) { return false; }
+  }
+
+  // Sumar comisión de activos
+  var comActiva = 0;
+  EVTS.forEach(function(e){ comActiva += pags(e.id).length * e.costo * COM; });
+
+  var semCom  = comActiva + hist.filter(function(h){return enRango(h.fecha, inicioSem);}).reduce(function(a,h){return a+(h.com||0);},0);
+  var mesCom  = comActiva + hist.filter(function(h){return enRango(h.fecha, inicioMes);}).reduce(function(a,h){return a+(h.com||0);},0);
+  var anioCom = comActiva + hist.filter(function(h){return enRango(h.fecha, inicioAnio);}).reduce(function(a,h){return a+(h.com||0);},0);
+  var totalCom= comActiva + hist.reduce(function(a,h){return a+(h.com||0);},0);
+  var record  = Number(localStorage.getItem('lb_record')||0);
+
+  // Resumen
+  var resEl = document.getElementById('cont-resumen');
+  if(resEl) resEl.innerHTML = [
+    ['Esta semana', fmt(semCom),  'var(--acc)'],
+    ['Este mes',    fmt(mesCom),  'var(--gld)'],
+    ['Este año',    fmt(anioCom), 'var(--blu)'],
+    ['Total',       fmt(totalCom),'var(--txt)'],
+    ['Mejor semana',fmt(record),  'var(--prp)'],
+    ['Proy. anual', fmt(semCom*52),'var(--sub)']
+  ].map(function(r){
+    return '<div style="background:var(--sur);border-radius:10px;padding:11px;text-align:center;">'
+      +'<div style="font-weight:800;font-size:16px;color:'+r[2]+';">'+r[1]+'</div>'
+      +'<div style="font-size:10px;color:var(--sub);margin-top:3px;">'+r[0]+'</div>'
+      +'</div>';
+  }).join('');
+
+  // Por quiniela activa
+  var pqEl = document.getElementById('cont-por-quiniela');
+  if(pqEl) {
+    var rows = EVTS.filter(function(e){
+      return dat(e.id).participantes.length > 0;
+    }).map(function(e){
+      var pg = pags(e.id).length, pnd = pends(e.id).length;
+      return {n:e.n, ic:e.ic, pg:pg, pnd:pnd, bruta:pg*e.costo, com:pg*e.costo*COM};
+    }).sort(function(a,b){ return b.com-a.com; });
+
+    if(!rows.length) {
+      pqEl.innerHTML = '<div style="color:var(--sub);font-size:12px;">Sin quinielas activas con jugadores</div>';
+    } else {
+      pqEl.innerHTML = rows.map(function(r){
+        return '<div style="display:flex;align-items:center;justify-content:space-between;'
+          +'padding:10px 0;border-bottom:1px solid var(--brd);">'
+          +'<div style="display:flex;align-items:center;gap:8px;">'
+          +'<span style="font-size:16px;">'+r.ic+'</span>'
+          +'<div><div style="font-weight:700;font-size:13px;">'+r.n+'</div>'
+          +'<div style="font-size:10px;color:var(--sub);">'+r.pg+' pagados · '+r.pnd+' pendientes</div>'
+          +'</div></div>'
+          +'<div style="text-align:right;">'
+          +'<div style="font-weight:700;font-size:14px;color:var(--acc);">'+fmt(r.com)+'</div>'
+          +'<div style="font-size:10px;color:var(--sub);">de '+fmt(r.bruta)+'</div>'
+          +'</div></div>';
+      }).join('');
+    }
+  }
+
+  // Pagos recibidos (activos confirmados)
+  var pagosEl = document.getElementById('cont-pagos');
+  var totalRecibido = 0;
+  var pagosRows = [];
+  EVTS.forEach(function(e){
+    pags(e.id).forEach(function(p){
+      pagosRows.push({fecha:p.fechaConf||'—', nombre:p.nombre, evento:e.n, monto:e.costo});
+      totalRecibido += e.costo;
+    });
+  });
+  var totBadge = document.getElementById('cont-total-badge');
+  if(totBadge) totBadge.textContent = fmt(totalRecibido) + ' total';
+  if(pagosEl) {
+    pagosEl.innerHTML = pagosRows.length
+      ? pagosRows.map(function(r){
+        return '<div style="display:flex;align-items:center;justify-content:space-between;'
+          +'padding:8px 0;border-bottom:1px solid var(--brd);">'
+          +'<div><div style="font-weight:700;font-size:13px;">'+r.nombre+'</div>'
+          +'<div style="font-size:10px;color:var(--sub);">'+r.evento+' · '+r.fecha+'</div></div>'
+          +'<div style="font-weight:700;color:var(--acc);">'+fmt(r.monto)+'</div>'
+          +'</div>';
+      }).join('')
+      : '<div style="color:var(--sub);font-size:12px;">Sin pagos confirmados aún</div>';
+  }
+
+  // Premios pagados (desde historial)
+  var premiosEl = document.getElementById('cont-premios');
+  if(premiosEl) {
+    var premRows = [];
+    hist.forEach(function(h){
+      (h.ganadores||[]).forEach(function(g){
+        if(g.premio > 0) premRows.push({fecha:h.fecha, nombre:g.nombre, evento:h.evento, premio:g.premio, pos:g.pos});
+      });
+    });
+    premiosEl.innerHTML = premRows.length
+      ? premRows.slice(0,20).map(function(r){
+        var medal = r.pos===1?'🥇':r.pos===2?'🥈':'🥉';
+        return '<div style="display:flex;align-items:center;justify-content:space-between;'
+          +'padding:8px 0;border-bottom:1px solid var(--brd);">'
+          +'<div><div style="font-weight:700;font-size:13px;">'+medal+' '+r.nombre+'</div>'
+          +'<div style="font-size:10px;color:var(--sub);">'+r.evento+' · '+r.fecha+'</div></div>'
+          +'<div style="font-weight:700;color:var(--red);">-'+fmt(r.premio)+'</div>'
+          +'</div>';
+      }).join('')
+      : '<div style="color:var(--sub);font-size:12px;">Sin historial de premios aún — archiva quinielas para ver aquí</div>';
+  }
+}
+
+function renderHistorial() {
+  var hist=getHist();
+  if(!hist.length){
+    $('hist-list').innerHTML='<div class="card" style="text-align:center;padding:32px;">'
+      +'<div style="font-size:36px;margin-bottom:12px;">📭</div>'
+      +'<div style="color:var(--sub);font-size:13px;">No hay quinielas archivadas aun</div></div>';
+    return;
+  }
+  var h='<div class="card" style="padding:0;overflow:hidden;">';
+  hist.forEach(function(entry,i){
+    var g1=entry.ganadores&&entry.ganadores.filter(function(g){return g.pos===1;})[0];
+    h+='<div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--brd);cursor:pointer;">'
+      +'<span style="font-size:22px;">'+entry.ic+'</span>'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div style="font-weight:700;font-size:13px;">'+entry.evento+'</div>'
+      +'<div style="font-size:10px;color:var(--sub);">'+entry.fecha+' · '+entry.jugadores+' jugadores · '+fmt(entry.bolsa)+'</div>'
+      +(g1?'<div style="font-size:11px;color:var(--gld);">🥇 '+g1.nombre+' — '+fmt(g1.premio)+'</div>':'')
+      +'</div>'
+      +'<div style="text-align:right;">'
+      +'<div style="font-weight:700;font-size:14px;color:var(--acc);">'+fmt(entry.com)+'</div>'
+      +'<div style="font-size:9px;color:var(--sub);">tu comision</div>'
+      +'</div></div>';
+  });
+  h+='</div>';
+  $('hist-list').innerHTML=h;
+}
+
+function editarJugador(pid) {
+  var d   = dat(curId);
+  var idx = d.participantes.findIndex(function(p){ return p.id == pid; });
+  if(idx < 0) return;
+  var p   = d.participantes[idx];
+
+  var modal = showModal(
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">'
+    +'<div style="font-family:Syne,sans-serif;font-weight:800;font-size:16px;">✏️ Editar Jugador</div>'
+    +'<button class="btn btn-r btn-sm" data-close>✕</button>'
+    +'</div>'
+    +'<div class="fld"><label>NOMBRE</label>'
+    +'<input class="inp" id="edit-jug-nombre" value="'+(p.nombre||'')+'" placeholder="Nombre completo"/></div>'
+    +'<div class="fld" style="margin-top:10px;"><label>WHATSAPP</label>'
+    +'<input class="inp" id="edit-jug-tel" value="'+(p.telefono||'')+'" placeholder="Número WhatsApp"/></div>'
+    +'<div class="fld" style="margin-top:10px;"><label>DESEMPATE</label>'
+    +'<input class="inp" id="edit-jug-des" value="'+(p.desempate||'')+'" placeholder="Criterio de desempate"/></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;">'
+    +'<button class="btn btn-o" data-close>Cancelar</button>'
+    +'<button class="btn btn-a" id="btn-save-jug-edit">💾 Guardar</button>'
+    +'</div>'
+  );
+
+  document.getElementById('btn-save-jug-edit').addEventListener('click', function() {
+    var nombre = (document.getElementById('edit-jug-nombre').value||'').trim();
+    var tel    = (document.getElementById('edit-jug-tel').value||'').trim();
+    var des    = (document.getElementById('edit-jug-des').value||'').trim();
+    if(!nombre) { alert('El nombre es requerido'); return; }
+    d.participantes[idx] = Object.assign({}, p, {nombre:nombre, telefono:tel, desempate:des});
+    document.body.removeChild(modal);
+    renderJugs();
+    renderHome();
+  });
+}
+
+function archivarQuiniela() {
+  var e=getEv(curId), gans=calcGans(curId), pg=pags(curId);
+  var entry={
+    id:Date.now(), fecha:new Date().toLocaleDateString('es-MX'),
+    evento:e.n, ic:e.ic, jugadores:pg.length,
+    bolsa:pg.length*e.costo, neta:pg.length*e.costo*(1-COM),
+    com:pg.length*e.costo*COM,
+    ganadores:gans.filter(function(g){return g.premio>0;}).map(function(g){return{nombre:g.nombre,pos:g.pos,premio:g.premio};})
+  };
+  // Guardar para gráfica semanal
+  var fecha=new Date(); var semKey='Sem '+fecha.getDate()+'/'+('0'+(fecha.getMonth()+1)).slice(-2);
+  histSemanas.push({lbl:semKey,com:entry.com});
+  if(histSemanas.length>12) histSemanas=histSemanas.slice(-12);
+  try{localStorage.setItem('lb_hist_sem',JSON.stringify(histSemanas));}catch(er){}
+
+  var hist=getHist(); hist.unshift(entry);
+  if(hist.length>50) hist=hist.slice(0,50);
+  saveHist(hist);
+  alert('✅ Quiniela archivada correctamente');
+  renderHistorial();
+}
+
+function generarReporte() {
+  var e=getEv(curId), d=dat(curId), pg=pags(curId), gans=calcGans(curId);
+  var neta=pg.length*e.costo*(1-COM);
+  var g1=gans.filter(function(g){return g.pos===1;}),
+      g2=gans.filter(function(g){return g.pos===2;}),
+      g3=gans.filter(function(g){return g.pos===3;});
+  var fecha=new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'});
+  var lineas=[
+    "═══════════════════════════════",
+    "  LA BOLSA — REPORTE DE CIERRE",
+    "═══════════════════════════════",
+    "",
+    "EVENTO:     "+e.n,
+    "FECHA:      "+fecha,
+    "JUGADORES:  "+pg.length,
+    "",
+    "──────── FINANZAS ──────────────",
+    "Bolsa bruta:   "+fmt(pg.length*e.costo),
+    "Tu comision:   "+fmt(pg.length*e.costo*COM)+" (10%)",
+    "Bolsa neta:    "+fmt(neta),
+    "",
+    "──────── GANADORES ─────────────",
+    "🥇 1°: "+(g1.map(function(x){return x.nombre;}).join('/')||'—')+(g1[0]?' → '+fmt(g1[0].premio):''),
+    "🥈 2°: "+(g2.map(function(x){return x.nombre;}).join('/')||'—')+(g2[0]?' → '+fmt(g2[0].premio):''),
+    "🥉 3°: "+(g3.map(function(x){return x.nombre;}).join('/')||'—')+(g3[0]?' → '+fmt(g3[0].premio):''),
+    "",
+    "──────── LISTA COMPLETA ────────"
+  ];
+  pg.forEach(function(p,i){
+    var sc=calcScore(p,curId);
+    lineas.push((i+1)+". "+p.nombre+" — "+sc.ac+" aciertos");
+  });
+  lineas.push("","═══════════════════════════════","    La Bolsa 🎯","═══════════════════════════════");
+  var texto=lineas.join("\n");
+  showModal(
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">'
+    +'<div style="font-size:14px;font-weight:700;color:var(--acc);">📄 Reporte de Cierre</div>'
+    +'<div style="display:flex;gap:8px;">'
+    +'<button class="btn btn-o btn-sm" id="rep-copy">Copiar</button>'
+    +'<button class="btn btn-r btn-sm" data-close>✕</button>'
+    +'</div></div>'
+    +'<pre style="font-family:Space Mono,monospace;font-size:11px;color:var(--txt);white-space:pre-wrap;line-height:1.7;background:var(--sur);padding:14px;border-radius:10px;">'+texto+'</pre>'
+  );
+  $('rep-copy') && $('rep-copy').addEventListener('click',function(){ cpText(this,texto); });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// EVENT DELEGATION — Click global
+// ═══════════════════════════════════════════════════════════════════════════════
+document.addEventListener('click', function(ev) {
+  var t=ev.target;
+
+  // Top nav
+  var tnb=t.closest('.tnb');
+  if(tnb){
+    document.querySelectorAll('.tnb').forEach(function(b){b.classList.remove('on');});
+    tnb.classList.add('on');
+    var viewMap={home:'v-home',pago:'v-pago',editor:'v-editor',compartir:'v-compartir',historial:'v-historial',contabilidad:'v-contabilidad',analytics:'v-analytics',config:'v-config'};
+    showView(viewMap[tnb.dataset.view]);
+    if(tnb.dataset.view==='home')      renderHome();
+    if(tnb.dataset.view==='pago')      renderPagoView();
+    if(tnb.dataset.view==='editor')    renderEditorSel();
+    if(tnb.dataset.view==='compartir') renderCompartirSel();
+    if(tnb.dataset.view==='historial')    renderHistorial();
+    if(tnb.dataset.view==='contabilidad') renderContabilidad();
+    if(tnb.dataset.view==='analytics')    renderAnalytics();
+    if(tnb.dataset.view==='config')    renderConfig();
+    return;
+  }
+
+  // Volver
+  if(t.id==='btn-back'){ goHome(); return; }
+
+  // Det tabs
+  var tabEl=t.closest('#det-tabs .tab');
+  if(tabEl){ goDetTab(tabEl.dataset.tab); return; }
+
+  // Abrir evento
+  var evCard=t.closest('.ev-card');
+  if(evCard && !t.classList.contains('ev-toggle')){ openEv(evCard.dataset.evid); return; }
+
+  // Toggle activo
+  if(t.classList.contains('ev-toggle')){
+    ev.stopPropagation();
+    var e2=getEv(t.dataset.evid); if(e2){ e2.activo=!e2.activo; renderHome(); }
+    return;
+  }
+
+  // Confirmar/eliminar jugador
+  if(t.classList.contains('pj-conf')){
+    dat(curId).participantes=dat(curId).participantes.map(function(p){
+      if(p.id==t.dataset.pid) return Object.assign({},p,{pagado:true, fechaConf:new Date().toLocaleDateString('es-MX')});
+      return p;
+    });
+    renderJugs(); renderHome(); return;
+  }
+  if(t.classList.contains('pj-edit')){ editarJugador(t.dataset.pid); return; }
+  if(t.classList.contains('pj-trust')){
+    dat(curId).participantes = dat(curId).participantes.map(function(p){
+      return p.id==t.dataset.pid ? Object.assign({},p,{confiable:!p.confiable}) : p;
+    });
+    renderJugs(); return;
+  }
+  if(t.classList.contains('pj-del')){
+    dat(curId).participantes=dat(curId).participantes.filter(function(p){return p.id!=t.dataset.pid;});
+    renderJugs(); renderHome(); return;
+  }
+
+  // Resultado partido
+  if(t.classList.contains('res-btn')){
+    var d=dat(curId), mid=t.dataset.mid, opt=t.dataset.opt;
+    if(!d.resultados[mid]) d.resultados[mid]={};
+    d.resultados[mid].resultado = d.resultados[mid].resultado===opt ? null : opt;
+    renderRes(); renderGans(); renderMsgs(); renderParcial(); return;
+  }
+  // UFC resultado por pelea
+  if(t.classList.contains('ufc-res-btn')){
+    var du=dat(curId), midu=t.dataset.mid, campo=t.dataset.campo, val=t.dataset.val;
+    if(!du.resultados[midu]) du.resultados[midu]={};
+    du.resultados[midu][campo] = du.resultados[midu][campo]===val ? null : val;
+    renderRes(); renderGans(); renderMsgs(); return;
+  }
+
+  // Desempate metodo
+  if(t.classList.contains('des-real-opt')){
+    var d2=dat(curId); d2.desReal=d2.desReal===t.dataset.opt?null:t.dataset.opt;
+    renderRes(); renderGans(); renderMsgs(); return;
+  }
+
+  // Toggle metodo pago
+  var pagoHdr=t.closest('.pago-hdr');
+  if(pagoHdr){
+    var k=pagoHdr.dataset.key;
+    if(!PAGO[k]) PAGO[k]=JSON.parse(JSON.stringify(PAGO_DEF[k]));
+    PAGO[k].on=!PAGO[k].on;
+    renderPagoView(); return;
+  }
+
+  // Guardar pago
+  if(t.id==='btn-save-pago'){ savePago(); return; }
+
+  // Editor
+  if(t.id==='btn-save-edit'){ saveEditor(); return; }
+  if(t.id==='btn-add-match'){
+    var eid=$('edit-sel').value, e3=getEv(eid); if(!e3) return;
+    var maxId=0; e3.matchups.forEach(function(m){if(m.id>maxId)maxId=m.id;});
+    e3.matchups.push({id:maxId+1,L:'Local',V:'Visitante'});
+    renderEdMatchups(e3);
+    // Focus first new input
+    var inputs=$('ed-matchups').querySelectorAll('.team-picker-input');
+    if(inputs.length) inputs[inputs.length-2].focus();
+    return;
+  }
+  if(t.classList.contains('ed-rm')){
+    var eid2=$('edit-sel').value, e4=getEv(eid2); if(!e4) return;
+    e4.matchups.splice(parseInt(t.dataset.idx),1);
+    e4.matchups.forEach(function(m,i){m.id=i+1;});
+    renderEdMatchups(e4); return;
+  }
+
+  // Archivar / Reporte
+  if(t.id==='btn-archivar'){ archivarQuiniela(); return; }
+  if(t.id==='btn-reporte'){  generarReporte();   return; }
+
+  // Copiar mensaje
+  if(t.classList.contains('msg-copy')){ cpText(t,decodeURIComponent(t.dataset.enc)); return; }
+
+  // Historial limpiar
+  // Backup
+  if(t.id==='btn-backup'){ backupData(); return; }
+  if(t.id==='btn-restore'){
+    var fi = $('backup-file-input');
+    if(fi) fi.click();
+    return;
+  }
+  if(t.id==='btn-export-jugadores'){ exportJugadoresCSV(); return; }
+  if(t.id==='btn-export-historial'){ exportHistorialCSV(); return; }
+
+  if(t.id==='btn-clear-hist'){
+    if(confirm('¿Borrar todo el historial?')){ saveHist([]); histSemanas=[]; try{localStorage.removeItem('lb_hist_sem');}catch(e){} renderHistorial(); }
+    return;
+  }
+
+  // Config — guardar WhatsApp
+  if(t.id==='btn-save-wa'){
+    var waVal = $('cfg-wa') && $('cfg-wa').value.trim();
+    if(!waVal || waVal.length < 10) { alert('Ingresa un número válido'); return; }
+    WA_NUM = waVal;
+    try { localStorage.setItem('lb_wa_num', waVal); } catch(e) {}
+    t.textContent='✅ Guardado'; setTimeout(function(){t.textContent='💾 Guardar número';},2000);
+    return;
+  }
+
+  // Config — cambiar PIN
+  if(t.id==='btn-save-pin'){
+    var errEl=$('cfg-pin-err');
+    var oldPin=$('cfg-pin-old')&&$('cfg-pin-old').value;
+    var newPin=$('cfg-pin-new')&&$('cfg-pin-new').value;
+    if(oldPin !== PIN_OK){ errEl.textContent='PIN actual incorrecto'; return; }
+    if(!newPin || newPin.length!==4 || !/^\d{4}$/.test(newPin)){ errEl.textContent='El PIN nuevo debe tener 4 dígitos'; return; }
+    PIN_OK = newPin;
+    try {
+      localStorage.setItem('lb_pin_code', newPin);
+      localStorage.setItem('lb_pin_hash', simpleHash(newPin));
+      sessionStorage.setItem('lb_pin', newPin);
+    } catch(e) {}
+    errEl.textContent='';
+    t.textContent='✅ PIN cambiado'; setTimeout(function(){t.textContent='🔐 Cambiar PIN';},2000);
+    if($('cfg-pin-old')) $('cfg-pin-old').value='';
+    if($('cfg-pin-new')) $('cfg-pin-new').value='';
+    return;
+  }
+
+  // Config — guardar plantillas
+  if(t.id==='btn-save-tpl'){
+    ['anuncio','resultados','privado'].forEach(function(k){
+      var ta=$('tpl-'+k); if(ta) saveTPL(k, ta.value);
+    });
+    t.textContent='✅ Plantillas guardadas'; setTimeout(function(){t.textContent='💾 Guardar todas las plantillas';},2000);
+    return;
+  }
+
+  // Config — preview plantilla
+  if(t.classList.contains('tpl-preview')){ previewTPL(t.dataset.tpl); return; }
+
+  // Marca — guardar
+  if(t.id==='btn-save-marca'){
+    var marca = {
+      nombre:          $('marca-nombre')  ? $('marca-nombre').value.trim()  : 'La Bolsa',
+      eslogan:         $('marca-eslogan') ? $('marca-eslogan').value.trim() : '¿Cuánto hay en la bolsa?',
+      color:           $('marca-color')   ? $('marca-color').value           : '#00E676',
+      colorSecundario: $('marca-color2')  ? $('marca-color2').value          : '#00BFA5',
+      logoUrl:         window._logoTemp   || (function(){
+                         try{return JSON.parse(localStorage.getItem('lb_marca')||'{}').logoUrl||'';}catch(e){return '';}
+                       })()
+    };
+    try { localStorage.setItem('lb_marca', JSON.stringify(marca)); } catch(e) {}
+    // Aplicar en admin también
+    document.documentElement.style.setProperty('--acc', marca.color);
+    var hdrCom = $('hdr-com'); if(hdrCom) hdrCom.style.color = marca.color;
+    t.textContent='✅ Marca guardada';
+    setTimeout(function(){t.textContent='💾 Guardar marca';},2000);
+    return;
+  }
+
+  // Marca — restablecer
+  if(t.id==='btn-reset-marca'){
+    if(!confirm('¿Restablecer la marca al diseño original?')) return;
+    window._logoTemp = null;
+    try { localStorage.removeItem('lb_marca'); } catch(e) {}
+    document.documentElement.style.removeProperty('--acc');
+    renderConfig();
+    return;
+  }
+
+  // Config — restablecer plantilla
+  if(t.classList.contains('tpl-reset')){
+    var k=t.dataset.tpl, ta=$('tpl-'+k);
+    if(ta && confirm('¿Restablecer plantilla a la versión original?')){
+      ta.value=TPL_DEFAULT[k]; saveTPL(k, TPL_DEFAULT[k]);
+    }
+    return;
+  }
+});
+
+// Inputs de resultados (input event)
+document.addEventListener('input', function(ev) {
+  var t=ev.target;
+  if(t.classList.contains('marcador-inp')){
+    var d=dat(curId); if(!d.resultados[t.dataset.mid]) d.resultados[t.dataset.mid]={};
+    d.resultados[t.dataset.mid][t.dataset.campo]=Number(t.value); return;
+  }
+  if(t.id==='des-real-inp'){
+    dat(curId).desReal=t.value===''?null:Number(t.value);
+    renderGans(); renderMsgs(); return;
+  }
+});
+
+// Editor y compartir selects
+document.addEventListener('change', function(ev) {
+  var t=ev.target;
+  if(t.id==='edit-sel'){ if(t.value) loadEditorForm(t.value); else $('editor-form').style.display='none'; return; }
+  if(t.id==='comp-sel'){ updateWACard(t.value); return; }
+  if(t.id==='backup-file-input'){ if(t.files[0]) restoreData(t.files[0]); return; }
+  // Analytics periodo change
+  if(t.id==='an-periodo'){ renderAnalytics(); return; }
+
+  // Mundial resultado selector
+  if(t.classList.contains('mundial-res-sel')){
+    var d=dat(curId), lid=t.dataset.lid;
+    if(!d.resultados) d.resultados={};
+    d.resultados[lid] = t.value || null;
+    renderGans(); renderMsgs(); return;
+  }
+});
+
+// Modo veedor — bloquear edición
+function aplicarVeedor() {
+  if(!window._veedor) return;
+  var s=document.createElement('style');
+  s.textContent='.btn-a,.btn-r,.btn-b,#btn-save-pago,#btn-save-edit,#btn-add-match,.ev-toggle,.pj-conf,.pj-del,.res-btn,.des-real-opt,.marcador-inp,.ed-rm,.tnb[data-view="pago"],.tnb[data-view="editor"]{opacity:.3!important;pointer-events:none!important;}';
+  document.head.appendChild(s);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════════
+loadConfig();
+initState();
+initPIN();
+initTheme();
+aplicarVeedor();
+renderHome();
+</script>
+</body>
+</html>
