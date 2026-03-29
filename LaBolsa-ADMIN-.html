@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>La Bolsa — Admin</title>
@@ -766,6 +767,22 @@ button:hover{opacity:.86;}
 var PIN_OK    = "1234";       // <- Cambia tu PIN aquí (se guardará hasheado)
 var WA_NUM    = "526643XXXXXX"; // <- Se sobreescribe desde Configuración
 
+// ============================================
+// CONEXIÓN A SUPABASE
+// ============================================
+const SUPABASE_URL = "https://cncgattgmvfpwwagocwc.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_SK433nP4N3QV1Rou1Ibokg_b_210...";
+
+let supabaseClient;
+
+function initSupabase() {
+  if (typeof supabase !== 'undefined') {
+    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log("✅ Supabase conectado");
+  } else {
+    console.error("❌ Supabase no cargó");
+  }
+}
 // ─── PLANTILLAS DEFAULT ───────────────────────────────────────────────────────
 var TPL_DEFAULT = {
   anuncio:
@@ -3346,6 +3363,7 @@ initState();
 initPIN();
 initTheme();
 aplicarVeedor();
+initSupabase();
 renderHome();
 </script>
 </body>
