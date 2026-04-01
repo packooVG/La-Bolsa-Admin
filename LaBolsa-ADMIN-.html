@@ -775,13 +775,67 @@ const SUPABASE_ANON_KEY = "sb_publishable_SK433nP4N3QV1Rou1Ibokg_b_210...";
 
 let supabaseClient;
 
-function initSupabase() {
+function initSubpage() {
   if (typeof supabase !== 'undefined') {
     supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     console.log("✅ Supabase conectado");
   } else {
     console.error("❌ Supabase no cargó");
   }
+}
+
+// ============================================
+// CREAR NUEVO EVENTO EN SUPABASE
+// ============================================
+async function crearEventoEnSupabase(eventoData) {
+  const { data, error } = await supabaseClient
+    .from('events')
+    .insert({
+      id: eventoData.id,
+      competition_id: eventoData.competition_id,
+      name: eventoData.name,
+      description: eventoData.description,
+      icon: eventoData.icon,
+      color_primary: eventoData.color_primary,
+      entry_cost: eventoData.entry_cost,
+      status: 'draft',
+      closes_at: eventoData.closes_at,
+      type_config: eventoData.type_config || {}
+    })
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creando evento:', error);
+    alert('❌ Error al crear evento en base de datos');
+    return null;
+  }
+  
+  console.log('✅ Evento creado en Supabase:', data);
+  return data;
+}
+
+// ============================================
+// AGREGAR PARTIDOS A UN EVENTO
+// ============================================
+async function agregarPartidosAEvento(eventId, partidos) {
+  for (let i = 0; i < partidos.length; i++) {
+    const partido = partidos[i];
+    const { error } = await supabaseClient
+      .from('event_matches')
+      .insert({
+        event_id: eventId,
+        match_order: partido.id,
+        local_team: partido.L,
+        visitor_team: partido.V,
+        is_main_event: partido.estelar || false
+      });
+    
+    if (error) {
+      console.error('Error agregando partido:', error);
+    }
+  }
+  console.log('✅ Partidos agregados a Supabase');
 }
 // ─── PLANTILLAS DEFAULT ───────────────────────────────────────────────────────
 var TPL_DEFAULT = {
@@ -2197,31 +2251,191 @@ function renderEdMatchups(e) {
   $('ed-matchups').querySelectorAll('.tpinp').forEach(function(inp){ attachPicker(inp); });
 }
 
-function saveEditor() {
-  var id=$('edit-sel').value, e=getEv(id); if(!e) return;
-  e.n=$('ed-n').value||e.n; e.costo=Number($('ed-costo').value)||e.costo;
-  e.activo=$('ed-activo').value==='1'; e.cierre=$('ed-cierre').value||e.cierre;
-  e.desc=$('ed-desc').value||e.desc; e.desLbl=$('ed-des-lbl').value||e.desLbl;
-  var rows=document.querySelectorAll('.ed-m'), newM=[];
-  rows.forEach(function(row,i){
-    var lInp=row.querySelector('.ed-l'), vInp=row.querySelector('.ed-v');
-    if(!lInp||!vInp) return;
-    var Lkey = lInp.dataset.key || lInp.value.trim();
-    var Vkey = vInp.dataset.key || vInp.value.trim();
-    var Lname = lInp.value.trim(), Vname = vInp.value.trim();
-    // Try to match display name back to key
-    var tL = getTeam(Lkey)||getTeam(Lname);
-    var tV = getTeam(Vkey)||getTeam(Vname);
-    var L  = tL ? Object.keys(TEAMS).find(function(k){return TEAMS[k]===tL;})||Lkey : Lkey;
-    var V  = tV ? Object.keys(TEAMS).find(function(k){return TEAMS[k]===tV;})||Vkey : Vkey;
-    if(L&&V) newM.push({id:i+1, L:L, V:V});
-  });
-  if(newM.length) e.matchups=newM;
-  $('edit-ok').style.display='block';
-  setTimeout(function(){ $('edit-ok').style.display='none'; },2500);
-  renderHome();
+async function crearEventoEnSupabase(eventoData) {
+  const { data, error } = await supabaseClient
+    .from('events')
+    .insert({
+      id: eventoData.id,
+      competition_id: eventoData.competition_id,
+      name: eventoData.name,
+      description: eventoData.description,
+      icon: eventoData.icon,
+      color_primary: eventoData.color_primary,
+      entry_cost: eventoData.entry_cost,
+      status: 'draft',
+      closes_at: eventoData.closes_at,
+      type_config: eventoData.type_config || {}
+    })
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creando evento:', error);
+    return null;
+  }
+  return data;
 }
 
+async function agregarPartidosAEvento(eventId, partidos) {
+  for (let i = 0; i < partidos.length; i++) {
+    const partido = partidos[i];
+    await supabaseClient
+      .from('event_matches')
+      .insert({
+        event_id: eventId,
+        match_order: partido.id,
+        local_team: partido.L,
+        visitor_team: partido.V,
+        is_main_event: partido.estelar || false
+      });
+  }
+}
+
+// ============================================
+// FUNCIONES DE SUPABASE PARA EVENTOS
+// ============================================
+
+async function crearEventoEnSupabase(eventoData) {
+  if (!supabaseClient) {
+    console.error('Supabase no inicializado');
+    return null;
+  }
+  
+  const { data, error } = await supabaseClient
+    .from('events')
+    .upsert({
+      id: eventoData.id,
+      competition_id: eventoData.competition_id,
+      name: eventoData.name,
+      description: eventoData.description,
+      icon: eventoData.icon,
+      color_primary: eventoData.color_primary,
+      entry_cost: eventoData.entry_cost,
+      status: eventoData.status || 'draft',
+      closes_at: eventoData.closes_at,
+      type_config: eventoData.type_config || {}
+    })
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error en Supabase:', error);
+    return null;
+  }
+  
+  console.log('✅ Evento guardado:', data);
+  return data;
+}
+
+async function agregarPartidosAEvento(eventId, partidos) {
+  if (!supabaseClient) return;
+  
+  // Primero eliminar partidos existentes
+  await supabaseClient
+    .from('event_matches')
+    .delete()
+    .eq('event_id', eventId);
+  
+  // Luego insertar los nuevos
+  for (let i = 0; i < partidos.length; i++) {
+    const p = partidos[i];
+    await supabaseClient
+      .from('event_matches')
+      .insert({
+        event_id: eventId,
+        match_order: p.id,
+        local_team: p.L,
+        visitor_team: p.V,
+        is_main_event: p.estelar || false
+      });
+  }
+  console.log('✅ Partidos actualizados');
+}
+
+async function crearEventoEnSupabase(eventoData) {
+  if (!supabaseClient) {
+    console.error('❌ Supabase no inicializado');
+    return null;
+  }
+  
+  console.log('📝 Guardando evento en Supabase:', eventoData);
+  
+  const { data, error } = await supabaseClient
+    .from('events')
+    .upsert({
+      id: eventoData.id,
+      competition_id: eventoData.competition_id,
+      name: eventoData.name,
+      description: eventoData.description,
+      icon: eventoData.icon,
+      color_primary: eventoData.color_primary,
+      entry_cost: eventoData.entry_cost,
+      status: eventoData.status || 'draft',
+      closes_at: eventoData.closes_at,
+      type_config: eventoData.type_config || {}
+    })
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('❌ Error en Supabase:', error);
+    return null;
+  }
+  
+  console.log('✅ Evento guardado en Supabase:', data);
+  return data;
+}
+
+async function saveEditor() {
+  var id = $('#edit-sel').value;
+  var e = getEv(id);
+  if (!e) return;
+  
+  // Preparar datos
+  const eventoData = {
+    id: id,
+    competition_id: e.competition_id || 'ligamx',
+    name: $('#ed-n').value || e.n,
+    description: $('#ed-desc').value || e.desc,
+    icon: e.ic,
+    color_primary: e.c,
+    entry_cost: Number($('#ed-costo').value) || e.costo,
+    status: e.activo ? 'open' : 'draft',
+    closes_at: $('#ed-cierre').value || e.cierre,
+    type_config: { 
+      desLbl: $('#ed-des-lbl').value || e.desLbl,
+      empate: e.empate,
+      desTipo: e.desTipo
+    }
+  };
+  
+  console.log('Guardando evento:', eventoData);
+  
+  // Guardar en Supabase
+  if (supabaseClient) {
+    const resultado = await crearEventoEnSupabase(eventoData);
+    if (resultado) {
+      await agregarPartidosAEvento(id, e.matchups);
+      alert('✅ Evento guardado en Supabase');
+    } else {
+      alert('⚠️ Error guardando en Supabase, revisa consola (F12)');
+    }
+  } else {
+    alert('⚠️ Supabase no conectado');
+  }
+  
+  // Guardar en localStorage (compatibilidad)
+  e.n = eventoData.name;
+  e.costo = eventoData.entry_cost;
+  e.activo = eventoData.status === 'open';
+  e.cierre = eventoData.closes_at;
+  e.desc = eventoData.description;
+  e.desLbl = eventoData.type_config.desLbl;
+  
+  $('#edit-ok').style.display = 'block';
+  setTimeout(function(){ $('#edit-ok').style.display = 'none'; }, 2500);
+  renderHome();
+}
 // ═══════════════════════════════════════════════════════════════════════════════
 // COMPARTIR
 // ═══════════════════════════════════════════════════════════════════════════════
